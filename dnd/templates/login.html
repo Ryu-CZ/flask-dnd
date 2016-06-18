@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+<div class="container-fluid" style="margin-right:auto; margin-left:auto; max-width:400px;">
+{% macro render_field(field, placeholder=None) %}
+  {% if field.errors %}
+  <div>
+  {% elif field.flags.error %}
+  <div>
+  {% else %}
+  <div>
+  {% endif %}
+      {% set css_class = 'form-control ' + kwargs.pop('class', '') %}
+      {{ field(class=css_class, placeholder=placeholder, **kwargs) }}
+  </div>
+{% endmacro %}
+
+<div align="center">
+    <legend>Log In</legend>
+    {% with errors = get_flashed_messages(category_filter=["error-message"]) %}
+      {% if errors %}
+        <div>
+        {% for error in errors %}
+          {{ error }}<br>
+        {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% if form.errors %}
+    <div>
+    {% for field, error in form.errors.items() %}
+      {% for e in error %}
+        {{ e }}<br>
+      {% endfor %}
+    {% endfor %}
+    </div>
+    {% endif %}
+    {% if link %}
+    <form method="POST" action="?link={{ link }}" accept-charset="UTF-8" role="form">
+    {% else %}
+    <form method="POST" action="" accept-charset="UTF-8" role="form">
+    {% endif %}
+      {{ form.csrf_token }}
+      {{ render_field(form.nickname, placeholder="Your Nickname",
+                                  autofocus="") }}
+      {{ render_field(form.password, placeholder="Password") }}
+      <button type="submit" name="submit" class="btn btn-default">submit</button>
+    </form>
+    <div class="box">New to DnD? <a href="{{ url_for('signup') }}">Create an account.</a></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+{% endblock %}

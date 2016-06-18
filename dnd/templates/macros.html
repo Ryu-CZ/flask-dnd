@@ -1,0 +1,38 @@
+{# ========================================================================== #}
+{% macro render_flashed_messages()%}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+{% endmacro %}
+
+
+{% macro voltaire_quote() %}
+{%
+    set quotes=[
+'I appreciate the counsel Simpson, now please trap door yourself out.',
+'I demand to see that capitalism castrating suffragette this instant.',
+'Beware, rabbits. I spy with my transplanted eyes.',
+'Don`t pester the rich. I don`t hand out candy, you son of a grinch.',
+'Burns: How much for your entire collection? 
+Comic Book Guy: Um, the speed of light expressed in dollars.
+Burns (to Smithers): Just give him Faraday`s constant.',
+'Hello, Smithers. Fancy seeing you in casual encounter park.',
+'I insist you never wear shoes or a proper necktie again. Just house slippers and the most humiliating tie there is - bolo.',
+'Take us out first. Anyone can start a family. These days no one can find a job.',
+'Smithers: They`re fighting like Iran and Iraq!
+Mr. Burns: What?
+Smithers: Persia and Mesopotamia.',
+'What`s in it for me?',
+'I am an angry old rich man!',
+
+    ]
+%}
+<blockquote>
+  <p>{{ quotes|random }}</p>
+  <footer>Mr. Burns</footer>
+</blockquote>
+{% endmacro %}

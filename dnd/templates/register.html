@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% from "macros.html" import render_flashed_messages %}
+{% from "macros_forms.html" import render_form %}
+{% block content %}
+<div class="container" style="max-width:620px;">
+
+  <h2>New Player Registration</h2>
+
+  {{ render_flashed_messages() }}
+  <div>
+    {{ render_form(form, class_='inline-form') }}
+  </div>
+  
+</div>
+{% endblock %}

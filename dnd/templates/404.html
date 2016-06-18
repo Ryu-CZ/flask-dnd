@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="container-fluid" style="margin-right:auto; margin-left:auto; max-width:404px;">
+<center>
+    <img src="{{ url_for('static', filename='images/404.png') }}" alt="homer image" class="img-responsive center-block" />
+    <h1>404 Not found</h1>
+</center>
+    <p>The page, you were looking for, was not found on this server.</p>
+    <p>Try <a href="{{ url_for('index_page') }}">index page</a>.</p>
+    <p>{{ request.path }}</p>
+</div>
+{% endblock %}
