@@ -1,10 +1,7 @@
 '''!
-@package burns.frontend.models
-@brief burns.frontend.models
-
+@brief Server front-end models
 @date Created on  Jun 7, 2016
-
-@author trval@kajot.cz
+@author [Ryu-CZ](https://github.com/Ryu-CZ)
 '''
 import datetime as dt
 from werkzeug.security import generate_password_hash

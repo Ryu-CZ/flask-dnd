@@ -36,6 +36,10 @@
           <a href="{{ url_for('index_page') }}">{#- -#}
           <i class="fa fa-home"></i>Front</a>{#- -#}
           </li>
+        <li{% if wiki %} class="active"{% endif %}>{#- -#}
+          <a href="{{ url_for('wiki') }}">{#- -#}
+          <i class="fa fa-book" aria-hidden="true"></i><i class="fa fa-wikipedia-w" aria-hidden="true"></i>iki</a>{#- -#}
+          </li>
         {% if current_user.is_authenticated() -%}
            {% if current_user.is_admin() -%}
            {% endif -%}

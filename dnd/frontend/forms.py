@@ -2,7 +2,7 @@
 '''!
 @brief frontend forms
 @date Created on Jun 6, 2016
-@author trval@kajot.cz
+@author [Ryu-CZ](https://github.com/Ryu-CZ)
 '''
 import flask
 from flask_wtf import Form

@@ -9,25 +9,25 @@ from flask import Flask, send_from_directory, url_for
 from flask_restful import Api
 from werkzeug.contrib.fixers import ProxyFix
 
-app_version = 'v16.24.00'
+app_version = 'v16.28.00'
 __version__ = app_version
 
 
 class Dnd(Flask):
     '''!
-    @brief Holds Dnd application class
+    @brief Holds DnD application class
     @see Flask
     '''
     def __init__(self, *args, **kwargs):
         '''!
-    	@brief Burns constructor API. Includes Api constructor call.
+    	@brief Server app constructor. Includes Api constructor call.
     	'''
         Flask.__init__(self, *args, **kwargs)
         self.version = __version__
         #setup config
         import config
         self.config.from_object(config)
-        self.config.from_pyfile('/etc/burns/config.py', silent=True)
+        self.config.from_pyfile('/etc/dnd/config.py', silent=True)
         #setup db
         from db import MongoDB
         self.db_class = MongoDB

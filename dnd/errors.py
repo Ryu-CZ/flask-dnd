@@ -2,20 +2,20 @@
 '''!
 @brief Set of special errors and exceptions used by server.
 @date Created on Jun 20, 2016
-@author trval@kajot.cz
+@author [Ryu-CZ](https://github.com/Ryu-CZ)
 '''
 from flask_restplus import abort
 
 
 class DndExc(Exception):
     '''!
-    @brief General exception of Burns. 
+    @brief General exception of this Server. 
     Exportable to dictionary with method dict().
     @see DndExc#abort()
     '''
     def __init__(self, user_msg="", internal_msg="", resp_code=404, err_code=0):
         '''!
-        @brief Constructs general exception of Burns. 
+        @brief Constructs general exception of Server. 
             Designed to use with flask_restplus.errors.abort(**kw)
         @param user_msg: message friendly for user
         @param internal_msg: message for developer. Serves to find, debug or eliminate the problem.
@@ -50,7 +50,7 @@ class DndExc(Exception):
 class UnexpectedExc(DndExc):
     def __init__(self, e, resp_code=500, err_code=5000):
         DndExc.__init__(self, 
-                          user_msg="Unexpected Burns Exception", 
+                          user_msg="Unexpected Server Exception", 
                           internal_msg=str(e), 
                           resp_code=resp_code, 
                           err_code=err_code)

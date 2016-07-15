@@ -1,5 +1,5 @@
 '''!
-@brief frontend controllers
+@brief Server front-end controllers
 @date Created on Jun 18, 2016
 @author [Ryu-CZ](https://github.com/Ryu-CZ)
 '''
@@ -9,6 +9,7 @@ from flask_login import LoginManager, current_user, login_user, logout_user, log
 import models
 import forms
 import string
+import markdown
 
 __all__ = (
     'init'
@@ -16,10 +17,10 @@ __all__ = (
 
 def init(app):
     '''!
-    @brief Initialise wallet API
+    @brief Initialize Server front-end
     @param app: Flask application
     '''
-    #prepare Burns api
+    #prepare Server friontend
     login_manager = LoginManager(app)
     login_manager.login_view = "login"
     
@@ -44,6 +45,22 @@ def init(app):
         version = getattr(app, 'version', 'unknown-version')
         return flask.render_template('front.html',database=database, 
                                      front=True, version=version)
+    
+    @app.route('/wiki')
+    def wiki():
+        doc = """
+Chapter
+=======
+
+Section
+-------
+
+* Item 1
+* Item 2
+"""
+        content = flask.Markup(markdown.markdown(doc))
+        return flask.render_template('wiki.html',content=content, 
+                                     wiki=True, title='DnD|Wiki')
     
     @app.route('/signup', methods=['GET', 'POST'], endpoint='signup')
     def signup():
