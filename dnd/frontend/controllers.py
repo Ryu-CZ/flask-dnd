@@ -17,10 +17,10 @@ __all__ = (
 
 def init(app):
     '''!
-    @brief Initialize Server front-end
+    @brief Initialise Server front-end
     @param app: Flask application
     '''
-    #prepare Server friontend
+    #prepare Server front-end
     login_manager = LoginManager(app)
     login_manager.login_view = "login"
     

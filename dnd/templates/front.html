@@ -6,7 +6,7 @@
     <img src="/static/images/logo.png" height="180" class="pull-left" style="margin:20px; clear:both;">
     <h1>DnD <small>{{ version }}</small></h1>
     <p>Hello{%- if current_user.is_authenticated() %} {{ current_user.first_name }}{% endif -%},</p>
-    <p>THis pages tell epic story about group of heroes.</p>
+    <p>This pages tell epic story about group of heroes.</p>
 
     {%- if current_user.is_authenticated() %}
     {# <p>You are currently logged.</p> #}

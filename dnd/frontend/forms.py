@@ -6,10 +6,9 @@
 '''
 import flask
 from flask_wtf import Form
-from wtforms import RadioField, PasswordField, HiddenField, StringField, IntegerField
+from wtforms import PasswordField, HiddenField, StringField
 # Import Form validators
-from wtforms.validators import Required, Email, Optional, Length, EqualTo, NumberRange,\
-    ValidationError
+from wtforms.validators import Required, Email, Optional, Length, EqualTo, ValidationError
 
 __all__ = (
     'Login', 'EditPlayer', 'AddCredit', 'SetCredit', 'NewPlayer'
@@ -68,13 +67,3 @@ class NewPlayer(Form):
     password_check = PasswordField('Password again', 
                             [EqualTo('password', 'Passwords must match!'),
                              Required()])
-
-
-
-class SetCredit(Form):
-    real = IntegerField('Real', [Optional(), NumberRange(min=0)])
-    bonus = IntegerField('Bonus', [Optional(), NumberRange(min=0)])
-
-
-class AddCredit(Form):
-    real = RadioField('Real', choices=[(x, x) for x in range(2000,10001,2000)])

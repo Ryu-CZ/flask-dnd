@@ -5,11 +5,11 @@
 '''
 import os
 import atexit
-from flask import Flask, send_from_directory, url_for
+from flask import Flask, send_from_directory, url_for, render_template
 from flask_restful import Api
 from werkzeug.contrib.fixers import ProxyFix
 
-app_version = 'v16.28.00'
+app_version = 'v16.30.00'
 __version__ = app_version
 
 
@@ -45,7 +45,9 @@ class Dnd(Flask):
         #setup frontend
         import frontend
         frontend.init(self)
-
+        @self.errorhandler(404)
+        def not_found(error):
+            return render_template('404.html', error=error), 404
     
     def init_db(self, *args, **kwargs):
         '''!
