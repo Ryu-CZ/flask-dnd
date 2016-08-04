@@ -56,22 +56,6 @@ def init(app):
         return flask.render_template('front.html',database=database, 
                                      front=True, version=version)
     
-    @app.route('/wiki')
-    def wiki():
-        doc = """
-Chapter
-=======
-
-Section
--------
-
-* Item 1
-* Item 2
-"""
-        content = flask.Markup(markdown.markdown(doc))
-        return flask.render_template('wiki.html',content=content, 
-                                     wiki=True, title='DnD|Wiki')
-    
     @app.route('/signup', methods=['GET', 'POST'], endpoint='signup')
     def signup():
         form = forms.NewPlayer(flask.request.form)
@@ -142,4 +126,31 @@ Section
             else:
                 flask.flash('Wrong password!', 'danger')
         return flask.render_template('player.html', form=form, edit_player=True)
+
+    @app.route('/wiki')
+    def wiki():
+        doc = """
+Default Wiki Page
+=================
+
+Author of sites did not fill this page yes
+
+Possibilities of wiki
+-------
+
+* Edit with Markdown language
+* Create [new page]({})
+""".format(url_for('wiki_new'))
+        content = flask.Markup(markdown.markdown(doc))
+        return flask.render_template('wiki.html',content=content, 
+                                     wiki=True, title='DnD|Wiki')
     
+
+    @app.route('/wiki/new', methods=['GET', 'POST'], endpoint='wiki_new')
+    def wiki_new():
+        form = forms.EditWikiPage(flask.request.form)
+        if form.validate_on_submit():
+            text = form.pagedown.data
+            print text
+            # do something interesting with the Markdown text
+        return flask.render_template('wiki_new.html', form=form)

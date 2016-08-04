@@ -1,0 +1,9 @@
+@CHARSET "UTF-8";
+
+.flask-pagedown-input  {
+     min-height: 320px;
+     min-width: 100px;
+}
+.flask-pagedown-preview  {
+     min-width: 100px;
+}

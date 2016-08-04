@@ -9,6 +9,7 @@ from flask_wtf import Form
 from wtforms import PasswordField, HiddenField, StringField
 # Import Form validators
 from wtforms.validators import Required, Email, Optional, Length, EqualTo, ValidationError
+from flask_pagedown.fields import PageDownField
 
 __all__ = (
     'Login', 'EditPlayer', 'AddCredit', 'SetCredit', 'NewPlayer'
@@ -67,3 +68,7 @@ class NewPlayer(Form):
     password_check = PasswordField('Password again', 
                             [EqualTo('password', 'Passwords must match!'),
                              Required()])
+    
+class EditWikiPage(Form):
+    name = StringField('Page Name', [Required()])
+    pagedown = PageDownField('Enter your markdown')

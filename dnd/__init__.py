@@ -8,8 +8,9 @@ import atexit
 from flask import Flask, send_from_directory, url_for, render_template
 from flask_restful import Api
 from flask_mongoengine import MongoEngine
-from werkzeug.contrib.fixers import ProxyFix
+from flask_pagedown import PageDown
 from flask_debugtoolbar import DebugToolbarExtension
+from werkzeug.contrib.fixers import ProxyFix
 
 app_version = 'v16.30.00'
 __version__ = app_version
@@ -48,6 +49,8 @@ app = DnD(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app)
 
 db = MongoEngine(app)
+
+pagedown = PageDown(app)
 
 toolbar = None
 if app.config.get('DEBUG_TOOLBAR_ACTIVATE', False):

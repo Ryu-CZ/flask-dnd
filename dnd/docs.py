@@ -5,8 +5,10 @@
 @author [Ryu-CZ](https://github.com/Ryu-CZ)
 '''
 from flask_mongoengine import Document
-from mongoengine import fields
+from mongoengine import fields, NULLIFY
 from werkzeug import generate_password_hash
+import datetime as dt
+
 
 
 class User(Document):
@@ -60,4 +62,14 @@ class User(Document):
             }
         if self.password:
             r['pw_hash'] = self.mask_password()   
-        return r   
+        return r
+    
+
+class WikiDoc(Document):
+    name = fields.StringField(required=True, max_length=62)
+    creat_date = fields.DateTimeField(required=True)
+    edit_date = fields.DateTimeField(required=True, default=dt.datetime.utcnow)
+    author = fields.ReferenceField('User')
+    text = fields.StringField(required=True, default='')
+
+User.register_delete_rule(WikiDoc, 'author', NULLIFY)
