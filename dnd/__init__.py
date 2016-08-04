@@ -7,13 +7,15 @@ import os
 import atexit
 from flask import Flask, send_from_directory, url_for, render_template
 from flask_restful import Api
+from flask_mongoengine import MongoEngine
 from werkzeug.contrib.fixers import ProxyFix
+from flask_debugtoolbar import DebugToolbarExtension
 
 app_version = 'v16.30.00'
 __version__ = app_version
 
 
-class Dnd(Flask):
+class DnD(Flask):
     '''!
     @brief Holds DnD application class
     @see Flask
@@ -28,11 +30,6 @@ class Dnd(Flask):
         import config
         self.config.from_object(config)
         self.config.from_pyfile('/etc/dnd/config.py', silent=True)
-        #setup db
-        from db import MongoDB
-        self.db_class = MongoDB
-        self.test_db()
-        self.before_first_request(f=self.init_db)
         #add favicon     
         @self.route('/favicon')   
         @self.route('/favicon.ico')
@@ -42,42 +39,21 @@ class Dnd(Flask):
             return send_from_directory(os.path.join(app.root_path, 'static/images'),
                                        'favicon.ico', 
                                        mimetype='image/vnd.microsoft.icon')
-        #setup frontend
-        import frontend
-        frontend.init(self)
         @self.errorhandler(404)
         def not_found(error):
             return render_template('404.html', error=error), 404
-    
-    def init_db(self, *args, **kwargs):
-        '''!
-        @brief Creates database handler
-        If one already exists it is closed and replaced by new one
-        Also automatic database close before app exit is set up with atexit lib
-        '''
-        self.close_db()
-        self.db = self.db_class(self)
-        #manage automatic database client close before app exit
-        atexit.register(self.close_db)
-    
-    def close_db(self, *args, **kwargs):
-        '''!
-        @brief Ensure closing db
-        '''
-        if hasattr(self, 'db') and self.db:
-            self.db.close()
+        
 
-    def test_db(self):
-        '''!
-        @brief Perform authorization test for default user
-        '''
-        print '\n{} database: data test starting'.format(self.db_class.__name__)
-        db = self.db_class(self)
-        print '\t testing authorization:', db.check_user_password_hash('Ajax', 'secret')
-        db.close()
-        db = None
-        print '{} database: data test complete\n'.format(self.db_class.__name__)
-
-
-app = Dnd(__name__)
+app = DnD(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app)
+
+db = MongoEngine(app)
+
+toolbar = None
+if app.config.get('DEBUG_TOOLBAR_ACTIVATE', False):
+    app.debug = True
+    toolbar = DebugToolbarExtension(app)
+
+#setup frontend
+import frontend
+frontend.init(app)

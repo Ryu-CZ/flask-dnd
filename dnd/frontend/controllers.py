@@ -6,10 +6,12 @@
 import flask
 from flask import url_for
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required
-import models
 import forms
 import string
 import markdown
+from dnd import docs
+from werkzeug.security import check_password_hash
+import datetime as dt
 
 __all__ = (
     'init'
@@ -17,19 +19,27 @@ __all__ = (
 
 def init(app):
     '''!
-    @brief Initialise Server front-end
-    @param app: Flask application
+    @brief Initialize Server front-end
+    @param db: MongoEngine
     '''
     #prepare Server front-end
     login_manager = LoginManager(app)
     login_manager.login_view = "login"
     
+    def check_user_password_hash(nickname, pwd):
+        '''!
+        @brief Return user only when user is found and users password hash fits, else non is returned
+        @param nickname: unique user name
+        @param pwd: password to check
+        '''
+        u = docs.User.objects.get(nickname=nickname)
+        if u is not None and check_password_hash(pwhash=u.pw_hash, password=pwd):
+            return u
+        return None
+
     @login_manager.user_loader
     def load_user(user_id):
-        u = app.db.get_user(user_id)
-        if u is not None:
-            return models.User(**u)
-        return None
+        return docs.User.objects.get(nickname=user_id)
 
     @login_manager.unauthorized_handler
     def unauthorized():
@@ -66,18 +76,21 @@ Section
     def signup():
         form = forms.NewPlayer(flask.request.form)
         if form.validate_on_submit():
-            app.db.add_player(nickname=form.nickname.data, 
-                              password=form.password.data, 
-                              first_name=form.first_name.data, 
-                              last_name=form.last_name.data, 
-                              email=form.email.data,
-                              city=form.city.data, 
-                              country=form.country.data)
-            user = app.db.check_player_password_hash(nickname=form.nickname.data, 
-                                                     pwd=form.password.data)
-            if user:
-                login_user(models.User(**user))
-                flask.flash('Welcome %s' % user.get('first_name', 'user'), 'success')
+            u = docs.User(nickname=form.nickname.data,
+                          first_name=form.first_name.data, 
+                          last_name=form.last_name.data, 
+                          email=form.email.data,
+                          city=form.city.data, 
+                          country=form.country.data,
+                          created=dt.datetime.utcnow(),
+                          admin=False,
+                          )
+            u.pw_hash = u.mask_password(form.password.data)
+            u.save()
+            u = docs.User.objects.get(nickname=form.nickname.data)
+            if u is not None and check_password_hash(pwhash=u.pw_hash, password=form.pwd.data):
+                login_user(u)
+                flask.flash('Welcome %s' % u.first_name, 'success')
                 following = flask.request.args.get('link', None)
                 return flask.redirect(following or url_for('finances', nickname=current_user.nickname))
             flask.flash('Invalid Nickname or Password!', 'error-message')
@@ -87,14 +100,12 @@ Section
     def login():
         form = forms.Login(flask.request.form)
         if form.validate_on_submit():
-            user = app.db.check_user_password_hash(nickname=form.nickname.data, 
-                                                   pwd=form.password.data)
-            print 'user', user
+            user = check_user_password_hash(nickname=form.nickname.data, 
+                                            pwd=form.password.data)
             if user:
-                user = app.db.get_user(nickname=form.nickname.data)
-                login_user(models.User(**user))
-                print 'loged in', current_user
-                flask.flash('Welcome %s' % user.get('first_name', 'user'), 'success')
+                login_user(user)
+                print 'loged in', current_user.nickname
+                flask.flash('Welcome %s' % user.first_name, 'success')
                 following = flask.request.args.get('link', None)
                 return flask.redirect(following or url_for('index_page'))
             flask.flash('Invalid Nickname or Password!', 'error-message')
@@ -111,9 +122,8 @@ Section
     def edit_player():
         form = forms.EditPlayer(flask.request.form, obj=current_user)
         if form.validate_on_submit():
-            user = app.db.check_user_password_hash(
-                                                nickname=form.nickname.data, 
-                                                pwd=form.current_password.data)
+            user = check_user_password_hash(nickname=form.nickname.data, 
+                                            pwd=form.current_password.data)
             form.nickname.data = current_user.nickname #do not change nickname
             if user:
                 form.populate_obj(current_user)
@@ -124,10 +134,11 @@ Section
                             'Must contain lower case chars')
                     if form.new_password.errors:
                         return flask.render_template('player.html', form=form)
-                    current_user.password = pw
-                _ = app.db.update_user(current_user.nickname, 
-                                         {'$set':current_user.as_player()})
-                flask.flash('Profile was updated.', 'success')
+                    current_user.pw_hash = current_user.mask_password(pw)
+                if current_user.save():
+                    flask.flash('Profile was updated.', 'success')
+                else:
+                    flask.flash('Cannot save changes!', 'danger')
             else:
                 flask.flash('Wrong password!', 'danger')
         return flask.render_template('player.html', form=form, edit_player=True)

@@ -4,7 +4,7 @@
 @date Created on Jun 6, 2016
 @author [Ryu-CZ](https://github.com/Ryu-CZ)
 '''
-import flask
+from dnd import docs
 from flask_wtf import Form
 from wtforms import PasswordField, HiddenField, StringField
 # Import Form validators
@@ -15,13 +15,13 @@ __all__ = (
 )
 
 class UniqueElem(object):
-    def __init__(self, coll_name, elem_name, message='Unique {elem} {value} already exists'):
-        self.coll_name = coll_name
+    def __init__(self, model, elem_name, message='Unique {elem} {value} already exists'):
+        self.model = model
         self.elem_name = elem_name
         self.message = message
         
     def __call__(self, form, field):
-        if flask.current_app.db[self.coll_name].count({self.elem_name: field.data}):
+        if docs.User.objects(**{self.elem_name:field.data}).count():
             raise ValidationError(self.message.format(elem=self.elem_name, 
                                                       value=field.data))
 
@@ -53,7 +53,7 @@ class EditPlayer(Form):
 class NewPlayer(Form):
     nickname = StringField('Nickname', [Required(), 
                                         Length(min=4), 
-                                        UniqueElem('player', 'nickname')])
+                                        UniqueElem('user', 'nickname')])
     player_id = HiddenField()
     first_name = StringField('First Name', [Required()])
     last_name = StringField('Last Name', [Required()])
