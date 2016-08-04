@@ -6,3 +6,6 @@
     {{ render_form(form, class_='inline-form') }}
 </div>
 {% endblock %}
+{% block bodyscripts %}
+{{ pagedown.include_pagedown() }}
+{% endblock %}
