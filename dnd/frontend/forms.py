@@ -6,7 +6,7 @@
 '''
 from dnd import docs
 from flask_wtf import Form
-from wtforms import PasswordField, HiddenField, StringField
+from wtforms import PasswordField, HiddenField, StringField, Label
 # Import Form validators
 from wtforms.validators import Required, Email, Optional, Length, EqualTo, ValidationError
 from flask_pagedown.fields import PageDownField
@@ -71,4 +71,8 @@ class NewPlayer(Form):
     
 class EditWikiPage(Form):
     name = StringField('Page Name', [Required()])
+    pagedown = PageDownField('Enter your markdown')
+    
+class EditMainWikiPage(Form):
+    name = Label('wikimain','Main Wiki Name')
     pagedown = PageDownField('Enter your markdown')

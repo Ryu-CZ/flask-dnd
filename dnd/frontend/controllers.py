@@ -17,6 +17,20 @@ __all__ = (
     'init'
 )
 
+_def_doc = """
+Default Wiki Page
+=================
+
+Author of sites did not fill this page yes
+
+Possibilities of wiki
+-------
+* Edit [Main page]({})
+* Create [new page]({})
+* Edit with Markdown language
+"""
+
+
 def init(app):
     '''!
     @brief Initialize Server front-end
@@ -32,9 +46,10 @@ def init(app):
         @param nickname: unique user name
         @param pwd: password to check
         '''
-        u = docs.User.objects.get(nickname=nickname)
-        if u is not None and check_password_hash(pwhash=u.pw_hash, password=pwd):
-            return u
+        u = docs.User.objects(nickname=nickname)
+        print u
+        if u is not None and len(u) and check_password_hash(pwhash=u.pw_hash, password=pwd):
+            return u[0]
         return None
 
     @login_manager.user_loader
@@ -129,18 +144,9 @@ def init(app):
 
     @app.route('/wiki')
     def wiki():
-        doc = """
-Default Wiki Page
-=================
-
-Author of sites did not fill this page yes
-
-Possibilities of wiki
--------
-
-* Edit with Markdown language
-* Create [new page]({})
-""".format(url_for('wiki_new'))
+        doc = docs.WikiDoc.objects(name='main')
+        if 0==len(doc):
+            doc = _def_doc.format(url_for('wiki_edit'), url_for('wiki_new'))
         content = flask.Markup(markdown.markdown(doc))
         return flask.render_template('wiki.html',content=content, 
                                      wiki=True, title='DnD|Wiki')
@@ -153,4 +159,20 @@ Possibilities of wiki
             text = form.pagedown.data
             print text
             # do something interesting with the Markdown text
-        return flask.render_template('wiki_new.html', form=form)
+        return flask.render_template('wiki_new.html', form=form, 
+                                     wiki=True, title='DnD|Wiki')
+    
+    @app.route('/wiki/edit', methods=['GET', 'POST'], endpoint='wiki_edit')
+    def wiki_edit():
+        form = forms.EditMainWikiPage(flask.request.form)
+        if form.validate_on_submit():
+            text = form.pagedown.data
+            print text
+            # do something interesting with the Markdown text
+        else:
+            doc = docs.WikiDoc.objects.filter(name='main')
+            if 0==len(doc):  
+                doc = _def_doc.format(url_for('wiki_edit'), url_for('wiki_new'))
+            form.pagedown.data = doc
+        return flask.render_template('wiki_new.html', form=form, 
+                                     wiki=True, title='DnD|Wiki')
