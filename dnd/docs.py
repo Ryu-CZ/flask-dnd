@@ -73,7 +73,7 @@ class User(Document):
 
 class WikiDoc(Document):
     name = fields.StringField(required=True, max_length=62)
-    creat_date = fields.DateTimeField(required=True)
+    create_date = fields.DateTimeField(required=True)
     edit_date = fields.DateTimeField(required=True, default=dt.datetime.utcnow)
     author = fields.ReferenceField('User')
     text = fields.StringField(required=True, default='')

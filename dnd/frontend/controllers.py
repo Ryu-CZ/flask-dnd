@@ -145,26 +145,46 @@ def init(app):
         return flask.render_template('player.html', form=form, edit_player=True)
 
     @app.route('/wikis')
-    @app.route('/wikis/<page_name>')
+    @app.route('/wikis/<page_name>', endpoint='wiki')
     def wiki(page_name='main'):
-        doc = docs.WikiDoc.objects(name=page_name)
-        if 0==len(doc):
+        doc = []
+        if current_user.is_authenticated():
+            doc = docs.WikiDoc.objects(name=page_name)
+        elif page_name != 'main':
+            doc = docs.WikiDoc.objects.get_or_404(name=page_name)
+        if not len(doc):
             if page_name=='main':
                 doc = _def_doc.format(url_for('wiki_edit', page_name=page_name), 
                                       url_for('wiki_new', page_name='new_wiki_page'))
             else:
                 return flask.redirect(url_for('wiki_new', page_name=page_name))
+        else:
+            doc = doc[0].text
         content = flask.Markup(markdown.markdown(doc))
         return flask.render_template('wiki.html',content=content, 
                                      wiki=True, title='DnD|Wiki')
+        
+            
     
 
     @app.route('/wikis/<page_name>/new', methods=['GET', 'POST'], endpoint='wiki_new')
+    @login_required
     def wiki_new(page_name):
         form = forms.EditWikiPage(flask.request.form)
         if form.validate_on_submit():
-            text = form.pagedown.data
-            print text
+            if docs.WikiDoc.objects(name=form.name.data).count():
+                flask.flash('Document with this name already exists!', 'danger')
+            else:
+                print form.pagedown.data
+                now = dt.datetime.utcnow()
+                doc = docs.WikiDoc(name=form.name.data,
+                                   text=form.pagedown.data,
+                                   author=current_user.pk,
+                                   create_date=now,
+                                   edit_date=now)
+                print doc
+                doc.save()
+                return flask.redirect(url_for('wiki', page_name=form.name.data))
             # do something interesting with the Markdown text
         else:
             if docs.WikiDoc.objects(name=page_name).count():
@@ -175,11 +195,16 @@ def init(app):
                                      wiki=True, title='DnD|Wiki')
     
     @app.route('/wikis/<page_name>/edit', methods=['GET', 'POST'], endpoint='wiki_edit')
+    @login_required
     def wiki_edit(page_name):
-        form = forms.EditMainWikiPage(flask.request.form)
+        form = None
+        if page_name=='main':
+            form = forms.EditMainWikiPage(flask.request.form)
+        else:
+            form = forms.EditWikiPage(flask.request.form)
         if form.validate_on_submit():
             text = form.pagedown.data
-            print text
+            print text            
             # do something interesting with the Markdown text
         else:
             doc = docs.WikiDoc.objects(name=page_name)
