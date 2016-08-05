@@ -64,6 +64,12 @@ class User(Document):
             r['pw_hash'] = self.mask_password()   
         return r
     
+    def __repr__(self):
+        return '<User: {}>'.format(self.nickname)
+    
+    def __str__(self):
+        return '<User: {} ({})>'.format(self.nickname, self.full_name())
+    
 
 class WikiDoc(Document):
     name = fields.StringField(required=True, max_length=62)

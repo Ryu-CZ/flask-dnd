@@ -8,8 +8,9 @@ from dnd import docs
 from flask_wtf import Form
 from wtforms import PasswordField, HiddenField, StringField, Label
 # Import Form validators
-from wtforms.validators import Required, Email, Optional, Length, EqualTo, ValidationError
+from wtforms.validators import Required, Email, Optional, Length, EqualTo, ValidationError, Regexp
 from flask_pagedown.fields import PageDownField
+import re
 
 __all__ = (
     'Login', 'EditPlayer', 'AddCredit', 'SetCredit', 'NewPlayer'
@@ -29,7 +30,7 @@ class UniqueElem(object):
 
 class Login(Form):
     nickname = StringField('Nickname', [
-                Required(message='Forgot your nickname?')])
+            Required(message='Forgot your nickname?')])
     password = PasswordField('Password', [
                 Required(message='Must provide a password. ;-)')])
 
@@ -70,7 +71,7 @@ class NewPlayer(Form):
                              Required()])
     
 class EditWikiPage(Form):
-    name = StringField('Page Name', [Required()])
+    name = StringField('Page Name', [Required(), Regexp(r'^([a-zA-Z0-9-_])+$', flags=re.IGNORECASE, message="Use only number, characters and '_'")])
     pagedown = PageDownField('Enter your markdown')
     
 class EditMainWikiPage(Form):

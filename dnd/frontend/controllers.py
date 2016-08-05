@@ -18,16 +18,17 @@ __all__ = (
 )
 
 _def_doc = """
-Default Wiki Page
+Main Page
 =================
 
-Author of sites did not fill this page yes
+Author of sites did not fill this page yet.
 
 Possibilities of wiki
 -------
 * Edit [Main page]({})
 * Create [new page]({})
-* Edit with Markdown language
+* Format with Markdown language
+* Link pages between themselves
 """
 
 
@@ -48,8 +49,8 @@ def init(app):
         '''
         u = docs.User.objects(nickname=nickname)
         print u
-        if u is not None and len(u) and check_password_hash(pwhash=u.pw_hash, password=pwd):
-            return u[0]
+        if u is not None and len(u) and check_password_hash(pwhash=u[0].pw_hash, password=pwd):
+                return u[0]
         return None
 
     @login_manager.user_loader
@@ -108,6 +109,7 @@ def init(app):
                 following = flask.request.args.get('link', None)
                 return flask.redirect(following or url_for('index_page'))
             flask.flash('Invalid Nickname or Password!', 'error-message')
+            form.password.data = None
         return flask.render_template('login.html', form=form, login=True)
     
     @app.route('/logout')
@@ -116,9 +118,9 @@ def init(app):
         logout_user()
         return flask.redirect(url_for('index_page'))
     
-    @app.route('/player', methods=['GET', 'POST'])
+    @app.route('/players/<nickname>', methods=['GET', 'POST'])
     @login_required
-    def edit_player():
+    def edit_player(nickname=None):
         form = forms.EditPlayer(flask.request.form, obj=current_user)
         if form.validate_on_submit():
             user = check_user_password_hash(nickname=form.nickname.data, 
@@ -142,37 +144,51 @@ def init(app):
                 flask.flash('Wrong password!', 'danger')
         return flask.render_template('player.html', form=form, edit_player=True)
 
-    @app.route('/wiki')
-    def wiki():
-        doc = docs.WikiDoc.objects(name='main')
+    @app.route('/wikis')
+    @app.route('/wikis/<page_name>')
+    def wiki(page_name='main'):
+        doc = docs.WikiDoc.objects(name=page_name)
         if 0==len(doc):
-            doc = _def_doc.format(url_for('wiki_edit'), url_for('wiki_new'))
+            if page_name=='main':
+                doc = _def_doc.format(url_for('wiki_edit', page_name=page_name), 
+                                      url_for('wiki_new', page_name='new_wiki_page'))
+            else:
+                return flask.redirect(url_for('wiki_new', page_name=page_name))
         content = flask.Markup(markdown.markdown(doc))
         return flask.render_template('wiki.html',content=content, 
                                      wiki=True, title='DnD|Wiki')
     
 
-    @app.route('/wiki/new', methods=['GET', 'POST'], endpoint='wiki_new')
-    def wiki_new():
+    @app.route('/wikis/<page_name>/new', methods=['GET', 'POST'], endpoint='wiki_new')
+    def wiki_new(page_name):
         form = forms.EditWikiPage(flask.request.form)
         if form.validate_on_submit():
             text = form.pagedown.data
             print text
             # do something interesting with the Markdown text
+        else:
+            if docs.WikiDoc.objects(name=page_name).count():
+                return flask.redirect(url_for('wiki_edit', page_name=page_name))
+            else:
+                form.name.data = page_name
         return flask.render_template('wiki_new.html', form=form, 
                                      wiki=True, title='DnD|Wiki')
     
-    @app.route('/wiki/edit', methods=['GET', 'POST'], endpoint='wiki_edit')
-    def wiki_edit():
+    @app.route('/wikis/<page_name>/edit', methods=['GET', 'POST'], endpoint='wiki_edit')
+    def wiki_edit(page_name):
         form = forms.EditMainWikiPage(flask.request.form)
         if form.validate_on_submit():
             text = form.pagedown.data
             print text
             # do something interesting with the Markdown text
         else:
-            doc = docs.WikiDoc.objects.filter(name='main')
-            if 0==len(doc):  
-                doc = _def_doc.format(url_for('wiki_edit'), url_for('wiki_new'))
+            doc = docs.WikiDoc.objects(name=page_name)
+            if 0==len(doc):
+                if page_name=='main':
+                    doc = _def_doc.format(url_for('wiki_edit', page_name=page_name), 
+                                          url_for('wiki_new', page_name='new_wiki_page'))
+                else:
+                    return flask.redirect(url_for('wiki_new', page_name=page_name))
             form.pagedown.data = doc
         return flask.render_template('wiki_new.html', form=form, 
                                      wiki=True, title='DnD|Wiki')
