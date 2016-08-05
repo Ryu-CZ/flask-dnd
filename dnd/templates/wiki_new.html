@@ -2,6 +2,7 @@
 {% from "macros.html" import render_flashed_messages %}
 {% from "macros_forms.html" import render_form %}
 {% block content  %}
+{{ render_flashed_messages() }}
 <div class="container">
     {{ render_form(form, class_='inline-form') }}
 </div>

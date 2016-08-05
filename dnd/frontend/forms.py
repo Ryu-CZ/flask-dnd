@@ -71,7 +71,7 @@ class NewPlayer(Form):
                              Required()])
     
 class EditWikiPage(Form):
-    name = StringField('Page Name', [Required(), Regexp(r'^([a-zA-Z0-9-_])+$', flags=re.IGNORECASE, message="Use only number, characters and '_'")])
+    name = StringField('Page Name', [Required(), Regexp(r'^([a-zA-Z0-9-_ ])+$', flags=re.IGNORECASE, message="Use only number, characters and '_'")])
     pagedown = PageDownField('Enter your markdown')
     
 class EditMainWikiPage(Form):

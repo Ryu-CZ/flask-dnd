@@ -148,6 +148,7 @@ def init(app):
     @app.route('/wikis/<page_name>', endpoint='wiki')
     def wiki(page_name='main'):
         doc = []
+        page_name = page_name.lower().replace(' ', '-')
         if current_user.is_authenticated():
             doc = docs.WikiDoc.objects(name=page_name)
         elif page_name != 'main':
@@ -170,21 +171,24 @@ def init(app):
     @app.route('/wikis/<page_name>/new', methods=['GET', 'POST'], endpoint='wiki_new')
     @login_required
     def wiki_new(page_name):
+        page_name = page_name.lower().replace(' ', '-')
         form = forms.EditWikiPage(flask.request.form)
         if form.validate_on_submit():
             #creating new doc
-            if docs.WikiDoc.objects(name=form.name.data).count():
+            if docs.WikiDoc.objects(name=form.name.data.lower().replace(' ', '-')).count():
                 flask.flash('Document with this name already exists!', 'danger')
             else:
                 now = dt.datetime.utcnow()
-                doc = docs.WikiDoc(name=form.name.data,
+                doc = docs.WikiDoc(title=form.name.data,
+                                   name=form.name.data.lower().replace(' ', '-'),
                                    text=form.pagedown.data,
                                    author=current_user.pk,
                                    create_date=now,
                                    edit_date=now)
                 doc.save()
+                flask.flash('Page "{}" is saved as new.'.format(doc.title), 'success')
                 #view new page after creation
-                return flask.redirect(url_for('wiki', page_name=form.name.data))
+                return flask.redirect(url_for('wiki', page_name=form.name.data.lower().replace(' ', '-')))
         else:
             #display page
             if docs.WikiDoc.objects(name=page_name).count():
@@ -200,6 +204,7 @@ def init(app):
     @login_required
     def wiki_edit(page_name):
         form = None
+        page_name = page_name.lower().replace(' ', '-')
         #Editing existing page doc
         if page_name=='main':
             form = forms.EditMainWikiPage(flask.request.form)
@@ -207,8 +212,33 @@ def init(app):
             form = forms.EditWikiPage(flask.request.form)
         if form.validate_on_submit():
             #write form
-            text = form.pagedown.data          
-            # do something interesting with the Markdown text
+            text = form.pagedown.data
+            doc = docs.WikiDoc.objects(name=form.name.data.lower().replace(' ', '-'))
+            now = dt.datetime.utcnow()
+            if 0==len(doc):
+                doc = docs.WikiDoc(title=form.name.data,
+                                   name=form.name.data.lower().replace(' ', '-'),
+                                   text=form.pagedown.data,
+                                   author=current_user.pk,
+                                   create_date=now,
+                                   edit_date=now)
+                doc.save()
+                if page_name!='main':
+                    flask.flash('Page "{}" is saved as new.'.format(doc.title), 'success')
+                else:
+                    flask.flash('Page "{}" is saved.'.format(doc.title), 
+                            'success')
+            else:
+                doc = doc[0]
+                if page_name!='main':
+                    doc.title = form.name.data
+                    doc.name = form.name.data.lower().replace(' ', '-')
+                doc.text = form.pagedown.data
+                doc.edit_date = now
+                doc.save()
+                flask.flash('Page "{}" is saved.'.format(doc.title), 
+                            'success')
+            
         else:
             #load form
             doc = docs.WikiDoc.objects(name=page_name)
@@ -216,7 +246,7 @@ def init(app):
             if 0==len(doc):
                 if page_name=='main':
                     text = _def_doc.format(url_for('wiki_edit', page_name=page_name), 
-                                          url_for('wiki_new', page_name='new_wiki_page'))
+                                          url_for('wiki_new', page_name='New Wiki Page'))
                 else:
                     return flask.redirect(url_for('wiki_new', page_name=page_name))
             else:
@@ -224,6 +254,6 @@ def init(app):
             #Populate form with existing data
             form.pagedown.data = text
             if page_name != 'main':
-                form.name.data = doc[0].name
+                form.name.data = doc[0].title
         return flask.render_template('wiki_new.html', form=form, 
                                      wiki=True, title='DnD|Wiki')

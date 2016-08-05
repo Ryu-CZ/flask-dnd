@@ -72,6 +72,7 @@ class User(Document):
     
 
 class WikiDoc(Document):
+    title = fields.StringField(required=True, max_length=62)
     name = fields.StringField(required=True, max_length=62)
     create_date = fields.DateTimeField(required=True)
     edit_date = fields.DateTimeField(required=True, default=dt.datetime.utcnow)

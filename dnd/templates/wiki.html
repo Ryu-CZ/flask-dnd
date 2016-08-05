@@ -1,6 +1,7 @@
 {% extends "base.html" %}
-
+{% from "macros.html" import render_flashed_messages %}
 {% block content  %}
+{{ render_flashed_messages() }}
 <div class="container">
     {{ content }}
 </div>
