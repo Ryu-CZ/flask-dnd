@@ -151,7 +151,7 @@ def init(app):
         if current_user.is_authenticated():
             doc = docs.WikiDoc.objects(name=page_name)
         elif page_name != 'main':
-            doc = docs.WikiDoc.objects.get_or_404(name=page_name)
+            doc = [docs.WikiDoc.objects.get_or_404(name=page_name)]
         if not len(doc):
             if page_name=='main':
                 doc = _def_doc.format(url_for('wiki_edit', page_name=page_name), 
@@ -161,7 +161,7 @@ def init(app):
         else:
             doc = doc[0].text
         content = flask.Markup(markdown.markdown(doc))
-        return flask.render_template('wiki.html',content=content, 
+        return flask.render_template('wiki.html', content=content, 
                                      wiki=True, title='DnD|Wiki')
         
             
@@ -172,24 +172,26 @@ def init(app):
     def wiki_new(page_name):
         form = forms.EditWikiPage(flask.request.form)
         if form.validate_on_submit():
+            #creating new doc
             if docs.WikiDoc.objects(name=form.name.data).count():
                 flask.flash('Document with this name already exists!', 'danger')
             else:
-                print form.pagedown.data
                 now = dt.datetime.utcnow()
                 doc = docs.WikiDoc(name=form.name.data,
                                    text=form.pagedown.data,
                                    author=current_user.pk,
                                    create_date=now,
                                    edit_date=now)
-                print doc
                 doc.save()
+                #view new page after creation
                 return flask.redirect(url_for('wiki', page_name=form.name.data))
-            # do something interesting with the Markdown text
         else:
+            #display page
             if docs.WikiDoc.objects(name=page_name).count():
+                #page alreadz exist, redirect to edit mode
                 return flask.redirect(url_for('wiki_edit', page_name=page_name))
             else:
+                #pre-fill page name
                 form.name.data = page_name
         return flask.render_template('wiki_new.html', form=form, 
                                      wiki=True, title='DnD|Wiki')
@@ -198,22 +200,30 @@ def init(app):
     @login_required
     def wiki_edit(page_name):
         form = None
+        #Editing existing page doc
         if page_name=='main':
             form = forms.EditMainWikiPage(flask.request.form)
         else:
             form = forms.EditWikiPage(flask.request.form)
         if form.validate_on_submit():
-            text = form.pagedown.data
-            print text            
+            #write form
+            text = form.pagedown.data          
             # do something interesting with the Markdown text
         else:
+            #load form
             doc = docs.WikiDoc.objects(name=page_name)
+            text = ''
             if 0==len(doc):
                 if page_name=='main':
-                    doc = _def_doc.format(url_for('wiki_edit', page_name=page_name), 
+                    text = _def_doc.format(url_for('wiki_edit', page_name=page_name), 
                                           url_for('wiki_new', page_name='new_wiki_page'))
                 else:
                     return flask.redirect(url_for('wiki_new', page_name=page_name))
-            form.pagedown.data = doc
+            else:
+                text = doc[0].text
+            #Populate form with existing data
+            form.pagedown.data = text
+            if page_name != 'main':
+                form.name.data = doc[0].name
         return flask.render_template('wiki_new.html', form=form, 
                                      wiki=True, title='DnD|Wiki')
