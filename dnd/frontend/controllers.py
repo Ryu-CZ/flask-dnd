@@ -88,7 +88,7 @@ def init(app):
             u.pw_hash = u.mask_password(form.password.data)
             u.save()
             u = docs.User.objects.get(nickname=form.nickname.data)
-            if u is not None and check_password_hash(pwhash=u.pw_hash, password=form.pwd.data):
+            if u is not None and check_password_hash(pwhash=u.pw_hash, password=form.password.data):
                 login_user(u)
                 flask.flash('Welcome %s' % u.first_name, 'success')
                 following = flask.request.args.get('link', None)
