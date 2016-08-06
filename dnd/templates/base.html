@@ -30,16 +30,16 @@
 	 {% block header -%}
 	 <div class="nav header text-nowrap" style="background: #eee">
       <div class="navbar-header">
-         <a class="navbar-brand">
-         <img src="/static/images/logo.png" height="40" />
+         <div class="navbar-brand" align="left">
+         <a href="{{ url_for('index_page') }}" title="To home of Heroes">
+         <img src="/static/images/logo.png" height="40" style="max-width:100px; margin-top: 1px;" />
          </a>
+         {% if current_user.is_authenticated() -%}
+         <b>{{current_user.nickname}}</b>
+         {% endif -%}
+         </div>
       </div>
       <ul class="nav nav-tabs nav-justified" style="margin-top: 16px;">
-        {% if current_user.is_authenticated() -%}
-         <li>
-         <p>{% if current_user.is_admin() -%}Admin: <b><a href="{{ url_for('edit_player', nickname=current_user.nickname) }}">{{current_user.nickname}}</a></b>{% else-%}User: <b>{{current_user.nickname}}</b>{% endif -%} </p>
-         </li>
-        {% endif -%}
         <li{% if front %} class="active"{% endif %}>{#- -#}
           <a href="{{ url_for('index_page') }}">{#- -#}
           <i class="fa fa-home"></i>Front</a>{#- -#}

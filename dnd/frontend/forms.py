@@ -44,7 +44,7 @@ class EditPlayer(Form):
                                 Email()])
     city = StringField('City', [Optional()])
     country = StringField('Country', [Optional()])
-    current_password = PasswordField('Current password', [])
+    current_password = PasswordField('Current password', [Required()])
     new_password = PasswordField('New password', [Optional(), 
                                                   Length(min=6)])
     new_password_check = PasswordField('New password again', 

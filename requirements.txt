@@ -8,3 +8,4 @@ Markdown>=2.6.6
 flask-mongoengine>=0.7.5
 flask-debugtoolbar>=0.10.0
 flask-pagedown>=0.2.1
+Flask-Gravatar>=0.4.2

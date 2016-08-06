@@ -3,10 +3,11 @@
 {% from "macros_forms.html" import render_form %}
 {% block content %}
 <div class="container">
-
+  {{ render_flashed_messages() }}
   <h2>{{ current_user.nickname }}<br><small>Player profile</small></h2>
 
-  {{ render_flashed_messages() }}
+  {% if current_user.email -%}<img src="{{ current_user.email | gravatar }}" class="img-rounded" alt="avatar image" style="width:156px">{%- endif -%}
+
   <div>
     {{ render_form(form, class_='inline-form') }}
   </div>

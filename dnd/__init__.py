@@ -10,6 +10,7 @@ from flask_restful import Api
 from flask_mongoengine import MongoEngine
 from flask_pagedown import PageDown
 from flask_debugtoolbar import DebugToolbarExtension
+from flask_gravatar import Gravatar
 from werkzeug.contrib.fixers import ProxyFix
 
 app_version = 'v16.30.00'
@@ -56,6 +57,15 @@ toolbar = None
 if app.config.get('DEBUG_TOOLBAR_ACTIVATE', False):
     app.debug = True
     toolbar = DebugToolbarExtension(app)
+
+gravatar = Gravatar(app,
+                    size=156,
+                    rating='x',
+                    default='retro',
+                    force_default=False,
+                    force_lower=False,
+                    use_ssl=False,
+                    base_url=None)
 
 #setup frontend
 import frontend
