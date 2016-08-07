@@ -21,7 +21,8 @@ MONGODB_DB = 'dnd'
 
 # Use a secure, unique and absolutely secret key for
 # signing the data. 
-CSRF_SESSION_KEY = "secret"
+CSRF_SESSION_KEY = "secret dnd"
+WTF_CSRF_SECRET_KEY = 'secret wtf dnd'
 
 # Secret key for signing cookies
 SECRET_KEY = "secret"

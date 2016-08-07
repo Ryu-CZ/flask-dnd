@@ -5,15 +5,17 @@
 @author [Ryu-CZ](https://github.com/Ryu-CZ)
 '''
 from dnd import docs
-from flask_wtf import Form
-from wtforms import PasswordField, HiddenField, StringField, Label
+from flask_wtf import Form, file
+from wtforms import PasswordField, HiddenField, StringField, TextAreaField, Label
+from wtforms.fields.html5 import EmailField
 # Import Form validators
 from wtforms.validators import Required, Email, Optional, Length, EqualTo, ValidationError, Regexp
 from flask_pagedown.fields import PageDownField
 import re
+# from flask_mongoengine.wtf import model_form
 
 __all__ = (
-    'Login', 'EditPlayer', 'AddCredit', 'SetCredit', 'NewPlayer'
+    'Login', 'EditPlayer', 'AddCredit', 'SetCredit', 'NewPlayer', 'EditWikiPage', 'EditMainWikiPage', 'ImageUpload'
 )
 
 class UniqueElem(object):
@@ -40,7 +42,7 @@ class EditPlayer(Form):
     player_id = HiddenField()
     first_name = StringField('First Name', [Required()])
     last_name = StringField('Last Name', [Required()])
-    email = StringField('Email', [Optional(), 
+    email = EmailField('Email', [Optional(), 
                                 Email()])
     city = StringField('City', [Optional()])
     country = StringField('Country', [Optional()])
@@ -59,7 +61,7 @@ class NewPlayer(Form):
     player_id = HiddenField()
     first_name = StringField('First Name', [Required()])
     last_name = StringField('Last Name', [Required()])
-    email = StringField('Email', [Required(), 
+    email = EmailField('Email', [Required(), 
                                 Email(),
                                 UniqueElem('player', 'email')])
     city = StringField('City', [Optional()])
@@ -71,9 +73,17 @@ class NewPlayer(Form):
                              Required()])
     
 class EditWikiPage(Form):
-    name = StringField('Page Name', [Required(), Regexp(r'^([a-zA-Z0-9-_ ])+$', flags=re.IGNORECASE, message="Use only number, characters and '_'")])
+    name = StringField('Page Name', [Required(), Regexp(r'^([a-zA-Z0-9-_ ])+$', 
+                                                        flags=re.IGNORECASE, 
+                                                        message="Use only number, characters and '_'")])
     pagedown = PageDownField('Enter your markdown')
     
 class EditMainWikiPage(Form):
     name = Label('wikimain','Main Wiki Name')
     pagedown = PageDownField('Enter your markdown')
+    
+class ImageUpload(Form):
+    name = StringField('Name', [Required()], description='Unique name of picture for future reference to it')
+    description = TextAreaField('Description', default='', description='Describe your picture')
+    image = file.FileField('Image File', [file.FileRequired(), 
+                                          file.FileAllowed(['jpg', 'png'], 'Images only!')])

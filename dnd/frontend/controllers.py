@@ -3,6 +3,7 @@
 @date Created on Jun 18, 2016
 @author [Ryu-CZ](https://github.com/Ryu-CZ)
 '''
+import os
 import flask
 from flask import url_for
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required
@@ -12,6 +13,7 @@ import markdown
 from dnd import docs
 from werkzeug.security import check_password_hash
 import datetime as dt
+from werkzeug import secure_filename
 
 __all__ = (
     'init'
@@ -30,6 +32,12 @@ Possibilities of wiki
 * Format with Markdown language
 * Link pages between themselves
 """
+
+def request_wants_image():
+    best = flask.request.accept_mimetypes.best_match(['image/*', 'text/html'])
+    return best == 'image/*' and \
+        flask.request.accept_mimetypes[best] > \
+        flask.request.accept_mimetypes['text/html']
 
 
 def init(app):
@@ -63,6 +71,10 @@ def init(app):
 
     @app.route('/')
     def index_page():
+        print 'index headers'
+        print flask.request.headers
+        print 'index request'
+        print flask.request
         database = '(Please sign in to see database information)'
         if current_user.is_authenticated():
             database = '{2} on {0}:{1} '.format(app.config.get('MONGODB_HOST'),
@@ -257,3 +269,43 @@ def init(app):
                 form.name.data = doc[0].title
         return flask.render_template('wiki_new.html', form=form, 
                                      wiki=True, title='DnD|Wiki')
+    
+    @app.route('/uploads/images', methods=['GET', 'POST'], endpoint='image_upload')
+    @login_required
+    def image_upload():
+        form = None
+        filename = None
+        if flask.request.method == 'POST':
+            form = forms.ImageUpload()
+            if form.validate_on_submit():
+                filename = secure_filename(form.name.data.lower())
+                doc_img = docs.Image(name=filename,
+                                     extension=os.path.splitext(secure_filename(form.image.data.filename))[1][1:].strip().lower(),
+                                     created=dt.datetime.utcnow(),
+                                     description=form.description.data or '')
+                doc_img.file.put(form.image.data)
+                doc_img.save()
+        else:
+            form = forms.ImageUpload(flask.request.form)
+        return flask.render_template('image_upload.html', form=form, 
+                                     images=True, title='DnD|Images',
+                                     filename=filename)
+    
+    @app.route('/images/<path:img_name>', methods=['GET', 'POST'], endpoint='images')
+    def images(img_name):
+        img = None
+        img_name = secure_filename(img_name.lower())
+        img_name, ext = os.path.splitext(img_name)
+        ext = ext[1:]
+        if ext == '':
+            #lets try luck with file name only
+            img = docs.Image.objects(name=img_name).first_or_404()
+        elif img_name is not None and len(img_name)>0:
+            img = docs.Image.objects.get_or_404(name=img_name, extension=ext.strip())
+        else:
+            return flask.render_template('404.html')
+        if request_wants_image():
+            return flask.send_file(img.file)
+        title = '{}.{}'.format(img.name, img.extension)
+        return flask.render_template('clear_image.html', img_url=url_for('images', img_name=title), title=title)
+            

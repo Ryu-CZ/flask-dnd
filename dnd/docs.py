@@ -80,3 +80,11 @@ class WikiDoc(Document):
     text = fields.StringField(required=True, default='')
 
 User.register_delete_rule(WikiDoc, 'author', NULLIFY)
+
+
+class Image(Document):
+    name = fields.StringField(required=True, unique=True, max_length=62, placeholder='Unique name of file')
+    extension = fields.StringField(required=True, max_length=6)
+    created = fields.DateTimeField(required=True, default=dt.datetime.utcnow)
+    description = fields.StringField(required=False, default='')
+    file = fields.ImageField(size=(2048, 2048, True), collection_name='image')
