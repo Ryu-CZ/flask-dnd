@@ -12,22 +12,39 @@ from wtforms.fields.html5 import EmailField
 from wtforms.validators import Required, Email, Optional, Length, EqualTo, ValidationError, Regexp
 from flask_pagedown.fields import PageDownField
 import re
+from werkzeug import secure_filename
 # from flask_mongoengine.wtf import model_form
 
 __all__ = (
     'Login', 'EditPlayer', 'AddCredit', 'SetCredit', 'NewPlayer', 'EditWikiPage', 'EditMainWikiPage', 'ImageUpload'
 )
 
-class UniqueElem(object):
+class UniqueItem(object):
     def __init__(self, model, elem_name, message='Unique {elem} {value} already exists'):
         self.model = model
         self.elem_name = elem_name
         self.message = message
         
     def __call__(self, form, field):
-        if docs.User.objects(**{self.elem_name:field.data}).count():
+        if self.model.objects(**{self.elem_name:field.data}).count():
             raise ValidationError(self.message.format(elem=self.elem_name, 
                                                       value=field.data))
+
+def file_renamer(s):
+    return secure_filename(str(s).lower())
+
+class UniqueFile(object):
+    def __init__(self, model, elem_name, name_mapper=file_renamer, message='Unique {elem} {value} already exists'):
+        self.model = model
+        self.elem_name = elem_name
+        self.message = message
+        self.name_mapper = name_mapper
+        
+    def __call__(self, form, field):
+        if self.model.objects(**{self.elem_name:self.name_mapper(field.data)}).count():
+            raise ValidationError(self.message.format(elem=self.elem_name, 
+                                                      value=field.data))
+
 
 
 class Login(Form):
@@ -57,13 +74,13 @@ class EditPlayer(Form):
 class NewPlayer(Form):
     nickname = StringField('Nickname', [Required(), 
                                         Length(min=4), 
-                                        UniqueElem('user', 'nickname')])
+                                        UniqueItem(docs.User, 'nickname')])
     player_id = HiddenField()
     first_name = StringField('First Name', [Required()])
     last_name = StringField('Last Name', [Required()])
     email = EmailField('Email', [Required(), 
                                 Email(),
-                                UniqueElem('player', 'email')])
+                                UniqueItem(docs.User, 'email')])
     city = StringField('City', [Optional()])
     country = StringField('Country', [Optional()])
     password = PasswordField('Password', [Required(), 
@@ -83,7 +100,7 @@ class EditMainWikiPage(Form):
     pagedown = PageDownField('Enter your markdown')
     
 class ImageUpload(Form):
-    name = StringField('Name', [Required()], description='Unique name of picture for future reference to it')
+    name = StringField('Name', [Required(), UniqueFile(docs.Image, 'name')], description='Unique name of picture for future reference to it')
     description = TextAreaField('Description', default='', description='Describe your picture')
     image = file.FileField('Image File', [file.FileRequired(), 
                                           file.FileAllowed(['jpg', 'png'], 'Images only!')])
