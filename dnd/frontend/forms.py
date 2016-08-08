@@ -104,3 +104,9 @@ class ImageUpload(Form):
     description = TextAreaField('Description', default='', description='Describe your picture')
     image = file.FileField('Image File', [file.FileRequired(), 
                                           file.FileAllowed(['jpg', 'png'], 'Images only!')])
+    
+class ImageEdit(Form):
+    pk = HiddenField()
+    name = StringField('Name', [Required()], description='Unique name of picture for future reference to it')
+    description = TextAreaField('Description', description='Describe your picture')
+    image = file.FileField('Image File', [file.FileAllowed(['jpg', 'png'], 'Images only!')])

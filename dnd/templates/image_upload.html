@@ -4,6 +4,9 @@
 {% block content  %}
 {{ render_flashed_messages() }}
 <div class="container">
+	{% if preview_url -%}
+	<img src="{{ preview_url }}" class="img-thumbnail" alt="{{ preview_url }}" style="max-width:320px">
+	{% endif -%}
     {{ render_form(form, class_='inline-form', enctype_='multipart/form-data') }}
 </div>
 {% endblock %}
