@@ -42,7 +42,7 @@ def request_wants_image():
 
 def init(app):
     '''!
-    @brief Initialize Server front-end
+    @brief Initialise Server front-end
     @param db: MongoEngine
     '''
     #prepare Server front-end
@@ -56,7 +56,6 @@ def init(app):
         @param pwd: password to check
         '''
         u = docs.User.objects(nickname=nickname)
-        print u
         if u is not None and len(u) and check_password_hash(pwhash=u[0].pw_hash, password=pwd):
                 return u[0]
         return None
@@ -71,10 +70,6 @@ def init(app):
 
     @app.route('/')
     def index_page():
-        print 'index headers'
-        print flask.request.headers
-        print 'index request'
-        print flask.request
         database = '(Please sign in to see database information)'
         if current_user.is_authenticated():
             database = '{2} on {0}:{1} '.format(app.config.get('MONGODB_HOST'),
