@@ -6,7 +6,7 @@
 '''
 from dnd import docs
 from flask_wtf import Form, file
-from wtforms import PasswordField, HiddenField, StringField, TextAreaField, Label
+from wtforms import PasswordField, HiddenField, StringField, TextAreaField
 from wtforms.fields.html5 import EmailField, DateTimeField
 # Import Form validators
 from wtforms.validators import Required, Email, Optional, Length, EqualTo, ValidationError, Regexp
