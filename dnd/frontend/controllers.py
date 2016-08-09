@@ -266,7 +266,9 @@ def init(app):
                 text = doc[0].text
             #Populate form with existing data
             form.pagedown.data = text
-            if page_name != 'main':
+            if page_name == 'main':
+                form.name.data = 'main'
+            else:
                 form.name.data = doc[0].title
         return flask.render_template('wiki_new.html', form=form, 
                                      wiki=True, title='DnD|Wiki')

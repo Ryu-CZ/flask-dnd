@@ -97,7 +97,7 @@ class EditWikiPage(Form):
     pagedown = PageDownField('Enter your markdown')
     
 class EditMainWikiPage(Form):
-    name = Label('wikimain','Main Wiki Name')
+    name = HiddenField()
     pagedown = PageDownField('Enter your markdown')
 
 
