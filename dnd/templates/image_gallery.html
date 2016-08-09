@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% from "macros.html" import render_flashed_messages, render_pagination %}
+{% from "macros_forms.html" import render_form %}
+{% block content  %}
+<div class="container" align="center">
+  {{ render_flashed_messages() }}
+  <div class="table-responsive" style="max-width:640px">
+  <table class="table table-bordered table-striped" style="margin-top:10px">
+  	<thead>
+      <tr>
+        <th>Name</th>
+        <th>Preview</th>
+        <th>Description</th>
+        <th>Uploaded</th>
+        <th>Author</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for img in images -%}
+      <tr style="text-align:center">
+        <td><a href="{{ url_for('image_detail', img_name=img.full_name()) }}" title="{{ img.full_name() }}">{{ img.full_name() }}</a></td>
+        <td>
+          <a href="{{ url_for('image_detail', img_name=img.full_name()) }}" title="{{ img.full_name() }}">
+            <img src="{{ url_for('images_thumb', img_name=img.full_name()) }}" class="img-thumbnail" alt="{{ img.full_name() }}" style="max-width:100px;min-width:20px">
+            </a>
+          </td>
+        <td><p>{{ img.description[:42] }}</p></td>
+        <td>{{ img.created | print_dtime}}</td>
+        <td>{{ img.author_id.nickname }}</td>
+      </tr>
+    {% endfor -%}
+    </tbody>
+  </table>
+  </div>
+  {{ render_pagination(pagination=pagination, endpoint='images') }}
+  </div>
+</div>
+
+{% endblock %}

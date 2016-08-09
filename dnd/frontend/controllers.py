@@ -50,6 +50,11 @@ def init(app):
     login_manager = LoginManager(app)
     login_manager.login_view = "login"
     
+    @app.template_filter('print_dtime')
+    def print_dtime(d):
+        return d.strftime('%Y-%m-%d %H:%M:%S')
+    
+    
     def check_user_password_hash(nickname, pwd):
         '''!
         @brief Return user only when user is found and users password hash fits, else non is returned
@@ -190,7 +195,7 @@ def init(app):
                 doc = docs.WikiDoc(title=form.name.data,
                                    name=form.name.data.lower().replace(' ', '-'),
                                    text=form.pagedown.data,
-                                   author_id=current_user.pk,
+                                   author_id=current_user._get_current_object(),
                                    create_date=now,
                                    edit_date=now)
                 doc.save()
@@ -227,7 +232,7 @@ def init(app):
                 doc = docs.WikiDoc(title=form.name.data,
                                    name=form.name.data.lower().replace(' ', '-'),
                                    text=form.pagedown.data,
-                                   author_id=current_user.pk,
+                                   author_id=current_user._get_current_object(),
                                    create_date=now,
                                    edit_date=now)
                 doc.save()
@@ -277,11 +282,12 @@ def init(app):
                 filename = secure_filename(form.name.data.lower())
                 doc_img = docs.Image(name=filename,
                                      extension=os.path.splitext(secure_filename(form.image.data.filename))[1][1:].strip().lower(),
-                                     author_id=current_user.pk,
+                                     author_id=current_user._get_current_object(),
                                      created=dt.datetime.utcnow(),
                                      description=form.description.data or '')
                 doc_img.file.put(form.image.data)
                 doc_img.save()
+                flask.flash('Image "{}" was uploaded.'.format(doc_img.name), 'success')
                 return flask.redirect(url_for('image_detail', img_name=doc_img.full_name()))
         else:
             form = forms.ImageUpload(flask.request.form)
@@ -289,8 +295,8 @@ def init(app):
                                      images=True, title='DnD|Images',
                                      filename=filename)
     
-    @app.route('/images/<img_name>', endpoint='images')
-    def images(img_name):
+    @app.route('/images/<img_name>', endpoint='image')
+    def image(img_name):
         img = None
         img_name = secure_filename(img_name.lower())
         img_name, ext = os.path.splitext(img_name)
@@ -305,7 +311,7 @@ def init(app):
         if request_wants_image():
             return flask.send_file(img.file)
         title = img.full_name()
-        return flask.render_template('clear_image.html', img_url=url_for('images', img_name=title), title=title)
+        return flask.render_template('clear_image.html', img_url=url_for('image', img_name=title), title=title, images=True)
     
     
     @app.route('/images/<img_name>/thumb', endpoint='images_thumb')
@@ -324,7 +330,7 @@ def init(app):
         if request_wants_image():
             return flask.send_file(img.file.thumbnail)
         title = img.full_name()
-        return flask.render_template('clear_image.html', img_url=url_for('images_thumb', img_name=title), title=title)
+        return flask.render_template('clear_image.html', img_url=url_for('images_thumb', img_name=title), title=title, images=True)
 
     @app.route('/images/<img_name>/edit', methods=['GET', 'POST'], endpoint='image_edit')
     @login_required
@@ -335,17 +341,17 @@ def init(app):
         if flask.request.method == 'POST':
             form = forms.ImageEdit()
             img = docs.Image.objects.get_or_404(pk=form.pk.data)
-            title = 'DnD|{}'.format(img.full_name())
             if form.validate_on_submit():
                 filename = secure_filename(form.name.data.lower())
                 img.name = filename
                 img.description = form.description.data or ''
                 if img.author_id is None:
-                    img.author_id = current_user.pk
+                    img.author_id = current_user._get_current_object()
                 if form.image.data:
                     img.extension = os.path.splitext(secure_filename(form.image.data.filename))[1][1:].strip().lower()
                     img.file.replace(form.image.data)
                 img.save()
+                flask.flash('Image changes save', 'success')
                 return flask.redirect(url_for('image_detail', img_name=img.full_name()))
         else:
             if ext == '':
@@ -359,12 +365,11 @@ def init(app):
             form.pk.data = img.pk
             form.name.data = img.name
             form.description.data = img.description
-            title = 'DnD|{}'.format(img.full_name())
         return flask.render_template('image_upload.html', 
                                      form=form, 
                                      images=True, 
-                                     title=title,
-                                     preview_url=url_for('images', img_name='{}.{}'.format(img.name, img.extension)),
+                                     title='DnD|{}'.format(img.full_name()),
+                                     img=img,
                                      filename=secure_filename(form.name.data.lower()))
         
     @app.route('/images/<img_name>/detail', endpoint='image_detail')
@@ -380,9 +385,17 @@ def init(app):
             img = docs.Image.objects.get_or_404(name=img_name, extension=ext.strip())
         else:
             return flask.render_template('404.html')
-        title = 'DnD|{}'.format(img.full_name())
         return flask.render_template('image_detail.html', 
-                                     img_url=url_for('images', img_name=img.full_name()), 
-                                     title=title, 
-                                     img=img)
+                                     img_url=url_for('image', img_name=img.full_name()), 
+                                     title='DnD|{}'.format(img.full_name()), 
+                                     img=img,
+                                     images=True)
     
+    @app.route('/images', endpoint='images')
+    def images():
+        pagination = docs.Image.objects.order_by('name').paginate(page=int(flask.request.args.get('page', 1)), 
+                                                                  per_page=int(app.config.get('IMAGES_PER_PAGE')))
+        return flask.render_template('image_gallery.html', 
+                                     title='DnD|Images',
+                                     images=pagination.items,
+                                     pagination=pagination)

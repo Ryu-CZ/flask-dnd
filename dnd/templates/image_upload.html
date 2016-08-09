@@ -2,11 +2,18 @@
 {% from "macros.html" import render_flashed_messages %}
 {% from "macros_forms.html" import render_form %}
 {% block content  %}
-{{ render_flashed_messages() }}
+
 <div class="container" style="max-width:640px;min-width:320px">
-	{% if preview_url -%}
-	<img src="{{ preview_url }}" class="img-thumbnail" alt="{{ preview_url }}" style="max-width:600px;min-width:320px">
+	{{ render_flashed_messages() }}
+	{% if img -%}
+	<img src="{{ url_for('image', img_name=img.full_name()) }}" class="img-thumbnail" alt="{{ img.full_name() }}" style="max-width:600px;min-width:320px">
+    <div>
+    <a href="{{ url_for('image_detail', img_name=img.full_name()) }}" title="Discart edit">
+    <i class="fa fa-reply" aria-hidden="true"></i>Discard changes</a>
+	</div>
 	{% endif -%}
+	<div>
     {{ render_form(form, class_='inline-form', enctype_='multipart/form-data') }}
+    </div>
 </div>
 {% endblock %}

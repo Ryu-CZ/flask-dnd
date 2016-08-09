@@ -48,6 +48,10 @@
           <a href="{{ url_for('wiki') }}">{#- -#}
           <i class="fa fa-book" aria-hidden="true"></i><i class="fa fa-wikipedia-w" aria-hidden="true"></i>iki</a>{#- -#}
           </li>
+        <li{% if images %} class="active"{% endif %}>{#- -#}
+          <a href="{{ url_for('images') }}">{#- -#}
+          <i class="fa fa-file-image-o" aria-hidden="true"></i>Images</a>{#- -#}
+          </li>
         {% if current_user.is_authenticated() -%}
            {% if current_user.is_admin() -%}
            {% endif -%}

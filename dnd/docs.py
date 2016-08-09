@@ -10,7 +10,6 @@ from werkzeug import generate_password_hash
 import datetime as dt
 
 
-
 class User(Document):
     nickname = fields.StringField(required=True, max_length=50)
     first_name = fields.StringField(required=True, max_length=50)
