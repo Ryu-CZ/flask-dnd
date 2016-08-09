@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% from "macros.html" import render_flashed_messages %}
+{% from "macros_forms.html" import render_form %}
+{% block content  %}
+{{ render_flashed_messages() }}
+<div class="container" style="max-width:600px;min-width:320px">
+
+  <a href="{{ url_for('images', img_name=img.name) }}" title="{{img.full_name()}}">
+    <img src="{{ img_url }}" class="img-thumbnail" alt="{{ img_url }}" style="max-width:600px;min-width:320px">
+  </a>
+
+  <table class="table table-striped" style="max-width:600px;min-width:320px">
+    <tbody>
+    {% if current_user.is_authenticated() -%}
+	  <tr>
+	    <td class="span1">
+	      <a href="{{ url_for('image_edit', img_name=img.name) }}" title="Edit Image">
+	      <i class="fa fa-pencil-square-o" aria-hidden="true"></i></a></td>
+	    <td class="span6"> </td>
+	  </tr>
+	{% endif -%}
+      <tr>
+        <td class="span1">Name:</td>
+        <td class="span6">{{ img.name }}</td>
+      </tr>
+	  <tr>
+        <td class="span1">Author:</td>
+        <td class="span6">{{ img.author_id.nickname}}</td>
+      </tr> 
+      <tr>
+        <td class="span1">Upload Date:</td>
+        <td class="span6">{{ img.created }}</td>
+      </tr> 
+      <tr>
+        <td class="span1">Format:</td>
+        <td class="span6">{{ img.file.format }}</td>
+      </tr>
+      <tr>
+        <td class="span1">Width:</td>
+        <td class="span6">{{ img.file.width }}</td>
+      </tr>
+      <tr>
+        <td class="span1">Height:</td>
+        <td class="span6">{{ img.file.height }}</td>
+      </tr>
+      <tr>
+        <td class="span1">md5:</td>
+        <td class="span6">{{ img.file.md5 }}</td>
+      </tr>
+      <tr>
+        <td class="span1">Description:</td>
+        <td class="span6">
+          <textarea disabled style="width:100%" title="Image description">
+			{{ img.description }}
+			</textarea>
+		</td>
+      </tr> 
+    </tbody>
+  </table>
+  
+</div>
+{% endblock %}

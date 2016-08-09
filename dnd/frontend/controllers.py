@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''!
 @brief Server front-end controllers
 @date Created on Jun 18, 2016
@@ -189,7 +190,7 @@ def init(app):
                 doc = docs.WikiDoc(title=form.name.data,
                                    name=form.name.data.lower().replace(' ', '-'),
                                    text=form.pagedown.data,
-                                   author=current_user.pk,
+                                   author_id=current_user.pk,
                                    create_date=now,
                                    edit_date=now)
                 doc.save()
@@ -226,7 +227,7 @@ def init(app):
                 doc = docs.WikiDoc(title=form.name.data,
                                    name=form.name.data.lower().replace(' ', '-'),
                                    text=form.pagedown.data,
-                                   author=current_user.pk,
+                                   author_id=current_user.pk,
                                    create_date=now,
                                    edit_date=now)
                 doc.save()
@@ -276,17 +277,19 @@ def init(app):
                 filename = secure_filename(form.name.data.lower())
                 doc_img = docs.Image(name=filename,
                                      extension=os.path.splitext(secure_filename(form.image.data.filename))[1][1:].strip().lower(),
+                                     author_id=current_user.pk,
                                      created=dt.datetime.utcnow(),
                                      description=form.description.data or '')
                 doc_img.file.put(form.image.data)
                 doc_img.save()
+                return flask.redirect(url_for('image_detail', img_name=doc_img.full_name()))
         else:
             form = forms.ImageUpload(flask.request.form)
         return flask.render_template('image_upload.html', form=form, 
                                      images=True, title='DnD|Images',
                                      filename=filename)
     
-    @app.route('/images/<img_name>', methods=['GET', 'POST'], endpoint='images')
+    @app.route('/images/<img_name>', endpoint='images')
     def images(img_name):
         img = None
         img_name = secure_filename(img_name.lower())
@@ -301,12 +304,12 @@ def init(app):
             return flask.render_template('404.html')
         if request_wants_image():
             return flask.send_file(img.file)
-        title = '{}.{}'.format(img.name, img.extension)
+        title = img.full_name()
         return flask.render_template('clear_image.html', img_url=url_for('images', img_name=title), title=title)
     
     
-    @app.route('/images/<img_name>/edit', methods=['GET', 'POST'], endpoint='image_edit')
-    def image_edit(img_name):
+    @app.route('/images/<img_name>/thumb', endpoint='images_thumb')
+    def images_thumb(img_name):
         img = None
         img_name = secure_filename(img_name.lower())
         img_name, ext = os.path.splitext(img_name)
@@ -318,24 +321,45 @@ def init(app):
             img = docs.Image.objects.get_or_404(name=img_name, extension=ext.strip())
         else:
             return flask.render_template('404.html')
-        title = 'DnD|images|{}.{}'.format(img.name, img.extension)
+        if request_wants_image():
+            return flask.send_file(img.file.thumbnail)
+        title = img.full_name()
+        return flask.render_template('clear_image.html', img_url=url_for('images_thumb', img_name=title), title=title)
+
+    @app.route('/images/<img_name>/edit', methods=['GET', 'POST'], endpoint='image_edit')
+    @login_required
+    def image_edit(img_name):
+        img_name = secure_filename(img_name.lower())
+        img_name, ext = os.path.splitext(img_name)
+        ext = ext[1:]
         if flask.request.method == 'POST':
             form = forms.ImageEdit()
             img = docs.Image.objects.get_or_404(pk=form.pk.data)
+            title = 'DnD|{}'.format(img.full_name())
             if form.validate_on_submit():
                 filename = secure_filename(form.name.data.lower())
-                print 'dummy save'
-#                 doc_img = docs.Image(name=filename,
-#                                      extension=os.path.splitext(secure_filename(form.image.data.filename))[1][1:].strip().lower(),
-#                                      created=dt.datetime.utcnow(),
-#                                      description=form.description.data or '')
-#                 doc_img.file.put(form.image.data)
-#                 doc_img.save()
+                img.name = filename
+                img.description = form.description.data or ''
+                if img.author_id is None:
+                    img.author_id = current_user.pk
+                if form.image.data:
+                    img.extension = os.path.splitext(secure_filename(form.image.data.filename))[1][1:].strip().lower()
+                    img.file.replace(form.image.data)
+                img.save()
+                return flask.redirect(url_for('image_detail', img_name=img.full_name()))
         else:
+            if ext == '':
+                #lets try luck with file name only
+                img = docs.Image.objects(name=img_name).first_or_404()
+            elif img_name is not None and len(img_name)>0:
+                img = docs.Image.objects.get_or_404(name=img_name, extension=ext.strip())
+            else:
+                return flask.render_template('404.html')
             form = forms.ImageEdit(flask.request.form)
             form.pk.data = img.pk
             form.name.data = img.name
-            form.description = img.description
+            form.description.data = img.description
+            title = 'DnD|{}'.format(img.full_name())
         return flask.render_template('image_upload.html', 
                                      form=form, 
                                      images=True, 
@@ -343,4 +367,22 @@ def init(app):
                                      preview_url=url_for('images', img_name='{}.{}'.format(img.name, img.extension)),
                                      filename=secure_filename(form.name.data.lower()))
         
-      
+    @app.route('/images/<img_name>/detail', endpoint='image_detail')
+    def image_detail(img_name):
+        img = None
+        img_name = secure_filename(img_name.lower())
+        img_name, ext = os.path.splitext(img_name)
+        ext = ext[1:]
+        if ext == '':
+            #lets try luck with file name only
+            img = docs.Image.objects(name=img_name).first_or_404()
+        elif img_name is not None and len(img_name)>0:
+            img = docs.Image.objects.get_or_404(name=img_name, extension=ext.strip())
+        else:
+            return flask.render_template('404.html')
+        title = 'DnD|{}'.format(img.full_name())
+        return flask.render_template('image_detail.html', 
+                                     img_url=url_for('images', img_name=img.full_name()), 
+                                     title=title, 
+                                     img=img)
+    

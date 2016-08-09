@@ -1,4 +1,4 @@
-# coding=utf-8
+# -*- coding: utf-8 -*-
 '''!
 @brief frontend forms
 @date Created on Aug , 2016
@@ -65,7 +65,7 @@ class User(Document):
         return r
     
     def __repr__(self):
-        return '<User: {}>'.format(self.nickname)
+        return '<User: {}>'.format(self.nickname.encode())
     
     def __str__(self):
         return '<User: {} ({})>'.format(self.nickname, self.full_name())
@@ -76,15 +76,24 @@ class WikiDoc(Document):
     name = fields.StringField(required=True, max_length=62)
     create_date = fields.DateTimeField(required=True)
     edit_date = fields.DateTimeField(required=True, default=dt.datetime.utcnow)
-    author = fields.ReferenceField('User')
+    author_id = fields.ReferenceField('User')
     text = fields.StringField(required=True, default='')
 
 User.register_delete_rule(WikiDoc, 'author', NULLIFY)
 
 
 class Image(Document):
-    name = fields.StringField(required=True, unique=True, max_length=62, placeholder='Unique name of file')
+    name = fields.StringField(required=True, unique=True, 
+                              max_length=62, 
+                              placeholder='Unique name of file')
     extension = fields.StringField(required=True, max_length=6)
+    author_id = fields.ReferenceField('User')
     created = fields.DateTimeField(required=True, default=dt.datetime.utcnow)
     description = fields.StringField(required=False, default='')
-    file = fields.ImageField(size=(2048, 2048, True), collection_name='image')
+    file = fields.ImageField(size=(2048, 2048, True), 
+                             thumbnail_size=(200,200, True), 
+                             collection_name='image')
+    def full_name(self):
+        return '{}.{}'.format(self.name, self.extension)
+User.register_delete_rule(Image, 'author', NULLIFY)
+    

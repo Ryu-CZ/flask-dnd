@@ -7,7 +7,7 @@
 from dnd import docs
 from flask_wtf import Form, file
 from wtforms import PasswordField, HiddenField, StringField, TextAreaField, Label
-from wtforms.fields.html5 import EmailField
+from wtforms.fields.html5 import EmailField, DateTimeField
 # Import Form validators
 from wtforms.validators import Required, Email, Optional, Length, EqualTo, ValidationError, Regexp
 from flask_pagedown.fields import PageDownField
@@ -18,6 +18,7 @@ from werkzeug import secure_filename
 __all__ = (
     'Login', 'EditPlayer', 'AddCredit', 'SetCredit', 'NewPlayer', 'EditWikiPage', 'EditMainWikiPage', 'ImageUpload'
 )
+
 
 class UniqueItem(object):
     def __init__(self, model, elem_name, message='Unique {elem} {value} already exists'):
@@ -98,7 +99,8 @@ class EditWikiPage(Form):
 class EditMainWikiPage(Form):
     name = Label('wikimain','Main Wiki Name')
     pagedown = PageDownField('Enter your markdown')
-    
+
+
 class ImageUpload(Form):
     name = StringField('Name', [Required(), UniqueFile(docs.Image, 'name')], description='Unique name of picture for future reference to it')
     description = TextAreaField('Description', default='', description='Describe your picture')
@@ -110,3 +112,11 @@ class ImageEdit(Form):
     name = StringField('Name', [Required()], description='Unique name of picture for future reference to it')
     description = TextAreaField('Description', description='Describe your picture')
     image = file.FileField('Image File', [file.FileAllowed(['jpg', 'png'], 'Images only!')])
+
+
+class ImageDetail(Form):
+    pk = HiddenField()
+    name = StringField('Name', readonly=True, description='Unique name of picture for future reference to it')
+    created = DateTimeField('Created', readonly=True)
+    author = StringField('Author', readonly=True)
+    description = TextAreaField('Description', readonly=True, description='Describe your picture')
