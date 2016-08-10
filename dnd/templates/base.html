@@ -66,7 +66,7 @@
 
       	{% else -%}
         <li{% if login %} class="active"{% endif %}>{#- -#}
-           <a href="{{ url_for('login') }}">{#- -#}
+           <a {% if login %}href="{{ url_for('login')}}"{% else %}href="{{ url_for('login', link=request.path)}}"{% endif %}>{#- -#}
            <i class="fa fa-sign-in"></i>Log In</a>{#- -#}
            </li>
         <li{% if register %} class="active"{% endif %}>{#- -#}
