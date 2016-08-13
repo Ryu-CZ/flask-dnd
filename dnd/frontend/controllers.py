@@ -105,7 +105,7 @@ def init(app):
                 login_user(u)
                 flask.flash('Welcome %s' % u.first_name, 'success')
                 following = flask.request.args.get('link', None)
-                return flask.redirect(following or url_for('finances', nickname=current_user.nickname))
+                return flask.redirect(following or url_for('index_page'))
             flask.flash('Invalid Nickname or Password!', 'error-message')
         return flask.render_template('register.html', form=form, register=True)
     
