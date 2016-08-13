@@ -3,6 +3,7 @@
 @date Created on Jun 18, 2016
 @author [Ryu-CZ](https://github.com/Ryu-CZ)
 '''
+import os
 import logging
 
 #detail log setting
@@ -18,6 +19,9 @@ PROFILE_LOG_LEVEL = logging.INFO
 MONGODB_HOST = 'localhost'
 MONGODB_PORT = 27017
 MONGODB_DB = 'dnd'
+if "MONGODB_URL" in os.environ:
+    MONGODB_HOST, MONGODB_PORT = os.environ.get('MONGODB_URL', 'localhost:27017').lstrip('mongodb://').rstrip('/').split(':')
+    MONGODB_PORT = int(MONGODB_PORT)
 
 # Use a secure, unique and absolutely secret key for
 # signing the data. 
