@@ -161,9 +161,7 @@ def init(app):
     @app.route('/wikis/<page_name>', endpoint='wiki')
     def wiki(page_name='main'):
         page_name = page_name.lower().replace(' ', '-')
-        print page_name
         doc = docs.WikiDoc.objects(name=page_name)
-        print doc
         if len(doc)==0:
             if page_name=='main':
                 doc = _def_doc.format(url_for('wiki_edit', page_name=page_name), 
