@@ -14,6 +14,13 @@
 	}
 }
 
+.divider-vertical {
+height: 50px;
+margin: 0 10px;
+border-left: 1px solid #a6a6a6;
+border-right: 1px solid #b6b6b6;
+}
+
 @import url(http://fonts.googleapis.com/css?family=Cabin+Condensed:500&text=Fork%20me%20on%20GitHub);
 
 body{
@@ -108,4 +115,24 @@ body{
 }
 .ribbon.white a{
   border: 2px dotted rgba(100,100,100,0.2);
+}
+
+/* make sidebar nav vertical */ 
+@media (min-width: 768px) {
+  .sidebar-nav .navbar .navbar-collapse {
+    padding: 0;
+    max-height: none;
+  }
+  .sidebar-nav .navbar ul {
+    float: none;
+    display: block;
+  }
+  .sidebar-nav .navbar li {
+    float: none;
+    display: block;
+  }
+  .sidebar-nav .navbar li a {
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
 }

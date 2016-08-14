@@ -37,3 +37,4 @@ ADMINS = frozenset(['nemo@nowhere.com'])
 DEBUG_TOOLBAR_ACTIVATE = False
 
 IMAGES_PER_PAGE = 18
+WIKIS_PER_PAGE = 18

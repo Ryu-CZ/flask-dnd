@@ -45,21 +45,21 @@
       </div>
       <div class="collapse navbar-collapse" id="myNavbar">
 	      <ul class="nav navbar-nav">
-	        <li{% if front %} class="active"{% endif %}>{#- -#}
-	          <a href="{{ url_for('index_page') }}">{#- -#}
-	          <i class="fa fa-home"></i>Front</a>{#- -#}
-	          </li>
-	        <li{% if wiki %} class="active"{% endif %}>{#- -#}
-	          <a href="{{ url_for('wiki') }}">{#- -#}
-	          <i class="fa fa-book" aria-hidden="true"></i><i class="fa fa-wikipedia-w" aria-hidden="true"></i>iki</a>{#- -#}
-	          </li>
 	        {% if current_user.is_authenticated() -%}
 	        <li{% if images %} class="active dropdown"{% else %} class="dropdown"{% endif %}>{#- -#}
 	          <a href="{{ url_for('images') }}">{#- -#}
 	          <i class="fa fa-file-image-o" aria-hidden="true"></i>Images<span class="caret"></span></a>{#- -#}
 	          <ul class="dropdown-menu">
 	            <li><a href="{{ url_for('images') }}">View all</a></li>
-			    <li><a href="{{ url_for('image_upload') }}">Upload new</a></li>
+			    <li><a href="{{ url_for('image_upload') }}">Upload New</a></li>
+			  </ul>
+	          </li>
+	        <li{% if wikilist %} class="active dropdown"{% else %} class="dropdown"{% endif %}>{#- -#}
+	          <a href="{{ url_for('wiki_list') }}">{#- -#}
+	          <i class="fa fa-book" aria-hidden="true"></i><i class="fa fa-wikipedia-w" aria-hidden="true"></i>iki Pages<span class="caret"></span></a>{#- -#}
+	          <ul class="dropdown-menu">
+	            <li><a href="{{ url_for('wiki_list') }}">View all</a></li>
+			    <li><a href="{{ url_for('wiki_new_blank') }}">Create New</a></li>
 			  </ul>
 	          </li>
 	        {% endif -%}          
@@ -75,13 +75,13 @@
                <i class="fa fa-sign-out"></i>Log Out</a>{#- -#}
                </li>
 	      	 {% else -%}
+	      	 <li{% if register %} class="active"{% endif %}>{#- -#}
+	           <a href="{{ url_for('signup') }}">{#- -#}
+	           <i class="fa fa-user-plus"></i>Sign Up</a>{#- -#}
+	           </li>
 	         <li{% if login %} class="active"{% endif %}>{#- -#}
 	           <a {% if login %}href="{{ url_for('login')}}"{% else %}href="{{ url_for('login', link=request.path)}}"{% endif %}>{#- -#}
 	           <i class="fa fa-sign-in"></i>Log In</a>{#- -#}
-	           </li>
-	         <li{% if register %} class="active"{% endif %}>{#- -#}
-	           <a href="{{ url_for('signup') }}">{#- -#}
-	           <i class="fa fa-user-plus"></i>Sign Up</a>{#- -#}
 	           </li>
 	        {% endif -%}
 	        </ul>
@@ -90,9 +90,55 @@
      </nav>
      </div>
 	 {% endblock header -%}
-     <a class="github-fork-ribbon left-bottom fixed" href="https://github.com/Ryu-CZ/flask-dnd" title="Fork me on GitHub" alt="Fork me on GitHub">Fork me on GitHub</a>
-	 {% block content -%}
-	 {% endblock content -%}
+     
+	<div class="container-fluid">
+	 <div class="row">
+	   <div class="col-sm-2 col-md-2 col-lg-2" role="navigation">
+         <div class="sidebar-nav">
+          <div class="navbar navbar-inverse" role="navigation" style="width:125px">
+          <div class="navbar-header">
+		  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#sideNavbar">
+	        <span class="icon-bar"></span>
+	        <span class="icon-bar"></span>
+	        <span class="icon-bar"></span>
+	      </button>
+	      </div>
+	      <div class="navbar-collapse collapse sidebar-navbar-collapse" id="sideNavbar">
+	       <ul class="nav navbar-nav">
+	         <li{% if front %} class="active"{% endif %}>{#- -#}
+	          <a href="{{ url_for('index_page') }}">{#- -#}
+	          <i class="fa fa-home"></i>Front</a>{#- -#}
+	          </li>
+	        <li{% if wiki %} class="active"{% endif %}>{#- -#}
+	          <a href="{{ url_for('wiki') }}">{#- -#}
+	          <i class="fa fa-book" aria-hidden="true"></i><i class="fa fa-wikipedia-w" aria-hidden="true"></i>iki</a>{#- -#}
+	          </li>
+	        <li{% if characters %} class="active"{% endif %}>{#- -#}
+	          <a href="#">{#- -#}
+	          <i class="fa fa-users" aria-hidden="true"></i>Characters</a>{#- -#}
+	          </li>
+	        <li{% if maps %} class="active"{% endif %}>{#- -#}
+	          <a href="#">{#- -#}
+	          <i class="fa fa-map"" aria-hidden="true"></i>Maps</a>{#- -#}
+	          </li>
+	       </ul>
+	       </div><!--/.nav-collapse -->
+	     </div>
+	   </div>
+	   </div>
+	   <div class="col-sm-4 col-md-5 col-lg-7">
+	     {% block content -%}
+	     {% endblock content -%}
+	    </div>
+	    <div class="col-sm-2 col-md-2 col-lg-1">
+	     {% block infobox -%}
+	     {% endblock infobox -%}
+	    </div>
+	  </div>
+	</div>
+	
+    <a class="github-fork-ribbon left-bottom fixed" href="https://github.com/Ryu-CZ/flask-dnd" title="Fork me on GitHub" alt="Fork me on GitHub">Fork me on GitHub</a>
+	 
 
 	 {% endblock body -%}
 	 

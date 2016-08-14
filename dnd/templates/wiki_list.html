@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% from "macros.html" import render_flashed_messages, render_pagination %}
+{% from "macros_forms.html" import render_form %}
+{% block content  %}
+<div class="container" align="center">
+  {{ render_flashed_messages() }}
+  <div class="table-responsive" style="max-width:640px">
+  <table class="table table-bordered table-striped" style="margin-top:10px">
+  	<thead>
+      <tr>
+        <th>Name</th>
+        <th>Title</th>
+        <th>Created</th>
+        <th>Last Edit</th>
+        <th>Author</th>
+      </tr>
+    </thead>
+    <tbody>
+    <tr style="text-align:center"><a href="{{ url_for('wiki_new_blank') }}" title="Create new page">Create new page</a></tr>
+    {% for doc in wikilist -%}
+      <tr style="text-align:center">
+        <td><a href="{{ url_for('wiki', page_name=doc.name) }}" title="Detail of page">{{ doc.name }}</a></td>
+        <td>{{ doc.title }}</td>
+        <td>{{ doc.create_date | print_dtime}}</td>
+        <td>{{ doc.edit_date | print_dtime}}</td>
+        <td>{{ doc.author_id.nickname }}</td>
+      </tr>
+    {% endfor -%}
+    </tbody>
+  </table>
+  </div>
+  {{ render_pagination(pagination=pagination, endpoint='wiki_list') }}
+  </div>
+</div>
+
+
+
+{% endblock %}

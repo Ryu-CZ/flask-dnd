@@ -176,13 +176,27 @@ def init(app):
         return flask.render_template('wiki.html', content=content, 
                                      wiki=True, title='DnD|Wiki')
         
+    
+    @app.route('/wikilist', endpoint='wiki_list')
+    @login_required
+    def wiki_list():
+        pagination = docs.WikiDoc.objects.order_by('name').paginate(page=int(flask.request.args.get('page', 1)), 
+                                                                    per_page=int(app.config.get('WIKIS_PER_PAGE', 7)))
+        return flask.render_template('wiki_list.html',
+                                     title='DnD|WikiList',
+                                     wikilist=pagination.items, 
+                                     pagination=pagination 
+                                     )
+        
             
     
 
+    @app.route('/wikis/new', methods=['GET', 'POST'], endpoint='wiki_new_blank')
     @app.route('/wikis/<page_name>/new', methods=['GET', 'POST'], endpoint='wiki_new')
     @login_required
-    def wiki_new(page_name):
-        page_name = page_name.lower().replace(' ', '-')
+    def wiki_new(page_name=None):
+        if page_name is not None:
+            page_name = page_name.lower().replace(' ', '-')
         form = forms.EditWikiPage(flask.request.form)
         if form.validate_on_submit():
             #creating new doc
@@ -202,8 +216,8 @@ def init(app):
                 return flask.redirect(url_for('wiki', page_name=form.name.data.lower().replace(' ', '-')))
         else:
             #display page
-            if docs.WikiDoc.objects(name=page_name).count():
-                #page alreadz exist, redirect to edit mode
+            if page_name is not None and docs.WikiDoc.objects(name=page_name).count():
+                #page already exist, redirect to edit mode
                 return flask.redirect(url_for('wiki_edit', page_name=page_name))
             else:
                 #pre-fill page name
