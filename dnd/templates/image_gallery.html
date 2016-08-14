@@ -16,6 +16,7 @@
       </tr>
     </thead>
     <tbody>
+    <tr style="text-align:center"><a href="{{ url_for('image_upload')}}" title="Add image">Upload new image</a></tr>
     {% for img in images -%}
       <tr style="text-align:center">
         <td><a href="{{ url_for('image_detail', img_name=img.full_name()) }}" title="{{ img.full_name() }}">{{ img.full_name() }}</a></td>
@@ -35,5 +36,7 @@
   {{ render_pagination(pagination=pagination, endpoint='images') }}
   </div>
 </div>
+
+
 
 {% endblock %}

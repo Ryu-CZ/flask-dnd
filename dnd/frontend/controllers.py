@@ -160,18 +160,18 @@ def init(app):
     @app.route('/wikis')
     @app.route('/wikis/<page_name>', endpoint='wiki')
     def wiki(page_name='main'):
-        doc = []
         page_name = page_name.lower().replace(' ', '-')
-        if current_user.is_authenticated():
-            doc = docs.WikiDoc.objects(name=page_name)
-        elif page_name != 'main':
-            doc = [docs.WikiDoc.objects.get_or_404(name=page_name)]
-        if not len(doc):
+        print page_name
+        doc = docs.WikiDoc.objects(name=page_name)
+        print doc
+        if len(doc)==0:
             if page_name=='main':
                 doc = _def_doc.format(url_for('wiki_edit', page_name=page_name), 
                                       url_for('wiki_new', page_name='new_wiki_page'))
-            else:
+            elif current_user.is_authenticated():
                 return flask.redirect(url_for('wiki_new', page_name=page_name))
+            else:
+                return flask.render_template('404.html')
         else:
             doc = doc[0].text
         content = flask.Markup(markdown.markdown(doc))
@@ -328,7 +328,7 @@ def init(app):
         elif img_name is not None and len(img_name)>0:
             img = docs.Image.objects.get_or_404(name=img_name, extension=ext.strip())
         else:
-            return flask.render_template('404.html')
+            return flask.render_template('404.html'), 404
         if request_wants_image():
             return flask.send_file(img.file.thumbnail)
         title = img.full_name()
@@ -362,7 +362,7 @@ def init(app):
             elif img_name is not None and len(img_name)>0:
                 img = docs.Image.objects.get_or_404(name=img_name, extension=ext.strip())
             else:
-                return flask.render_template('404.html')
+                return flask.render_template('404.html'), 404
             form = forms.ImageEdit(flask.request.form)
             form.pk.data = img.pk
             form.name.data = img.name
@@ -375,6 +375,7 @@ def init(app):
                                      filename=secure_filename(form.name.data.lower()))
         
     @app.route('/images/<img_name>/detail', endpoint='image_detail')
+    @login_required
     def image_detail(img_name):
         img = None
         img_name = secure_filename(img_name.lower())
@@ -394,6 +395,7 @@ def init(app):
                                      images=True)
     
     @app.route('/images', endpoint='images')
+    @login_required
     def images():
         pagination = docs.Image.objects.order_by('name').paginate(page=int(flask.request.args.get('page', 1)), 
                                                                   per_page=int(app.config.get('IMAGES_PER_PAGE')))

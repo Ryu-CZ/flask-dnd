@@ -13,7 +13,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from flask_gravatar import Gravatar
 from werkzeug.contrib.fixers import ProxyFix
 
-app_version = 'v16.30.00'
+app_version = 'v16.32.00'
 __version__ = app_version
 
 
