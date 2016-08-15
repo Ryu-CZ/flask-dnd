@@ -1,9 +1,10 @@
 {% extends "base.html" %}
 {% block body %}
 <div class="container">
-    <h1><i class="fa fa-hand-stop-o"></i> 401 Unauthorized</h1>
+    <h1><i class="fa fa-lock"></i> 401 Unauthorized</h1>
+    <p>You tried to access {{ request.path }}</p>
     <p>You need to be logged in to access this page,
     please <a href="{{ url_for('login', link=request.script_root+request.path) }}">log in</a>.</p>
-    <p>You tried to access {{ request.path }}</p>
+    <p>Also you can go back to <a href="{{ url_for('index_page') }}">home</a></p>
 </div>
 {% endblock %}
