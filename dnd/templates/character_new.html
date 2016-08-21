@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% from "macros.html" import render_flashed_messages %}
+{% from "macros_forms.html" import render_form %}
+{% block content  %}
+{{ render_flashed_messages() }}
+<div class="container">
+    {{ render_form(form, class_='inline-form') }}
+</div>
+{% endblock %}
+{% block bodyscripts %}
+{{ pagedown.include_pagedown() }}
+{% endblock %}

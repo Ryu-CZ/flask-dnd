@@ -415,3 +415,37 @@ def init(app):
                                      title='DnD|Images',
                                      images=pagination.items,
                                      pagination=pagination)
+        
+
+    @app.route('/characters/new', methods=['GET', 'POST'], endpoint='character_new')
+    @login_required
+    def chraacter_new():
+        form = forms.NewCharacter(flask.request.form)
+        if form.validate_on_submit():
+            #submiting new character
+            slug = secure_filename(form.name.data.lower())
+            #creating new char
+            now = dt.datetime.utcnow()
+            doc = docs.Character(name=form.name.data,
+                                 slug=slug,
+                                 image_id=None,
+                                 create_date=now,
+                                 edit_date=now,
+                                 owner_id = None,
+                                 quick_desription = form.quick_desription.data, #short char description
+                                 desription = form.desription.data, #markdown char description
+                                 biography = form.biography.data, #markdown char history
+                                 tags = [],
+                                 is_player = form.is_player.data,
+                                 gender = form.gender.data)
+            doc.save()
+            flask.flash('Character "{}" is saved as new.'.format(doc.slug), 'success')
+            #view new char after creation
+            return flask.redirect(url_for('character_new', page_name=doc.slug))
+        return flask.render_template('character_new.html', 
+                                     form=form, 
+                                     characters=True, 
+                                     title='DnD|Characters')
+#     @app.route('/characters', endpoint='characters')
+#     @app.route('/characters/<slug>', endpoint='character')
+#     @app.route('/characters/<slug>/edit', methods=['GET', 'POST'], endpoint='character_edit')

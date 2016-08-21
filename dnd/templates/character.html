@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% from "macros.html" import render_flashed_messages %}
+{% block content  %}
+{{ render_flashed_messages() }}
+<div class="container-fluid card" style="background-color:wite;">
+  <div class="row card-block">
+    <div class="col-sm-9">
+      <h4 class="card-title">Description</h4>
+      {{ character.html_desription() }}
+    </div>
+    {% if character.image_id %}
+    <div class="col-sm-3">
+      <img class="img-responsive" src="{{ url_for('image', img_name=character.image_id.name) }}" alt="{{ character.image_id.name }}" style="margin:10px;">
+    </div>
+    {% endif %}
+  </div>
+  <div class="card-block">
+    <h4 class="card-title">Bio</h4>
+    <div class="card-text">
+      {{ character.html_biography() }}
+    </div>
+  </div>
+</div>
+{% endblock %}

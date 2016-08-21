@@ -6,7 +6,7 @@
 '''
 from dnd import docs
 from flask_wtf import Form, file
-from wtforms import PasswordField, HiddenField, StringField, TextAreaField
+from wtforms import PasswordField, HiddenField, StringField, TextAreaField, BooleanField, SelectField
 from wtforms.fields.html5 import EmailField, DateTimeField
 # Import Form validators
 from wtforms.validators import Required, Email, Optional, Length, EqualTo, ValidationError, Regexp
@@ -32,16 +32,18 @@ class UniqueItem(object):
                                                       value=field.data))
 
 def file_renamer(s):
-    return secure_filename(str(s).lower())
+    return secure_filename(s.lower())
 
 class UniqueFile(object):
-    def __init__(self, model, elem_name, name_mapper=file_renamer, message='Unique {elem} {value} already exists'):
+    def __init__(self, model, elem_name, name_mapper=file_renamer, message="Unique {elem} '{value}' already exists"):
         self.model = model
         self.elem_name = elem_name
         self.message = message
         self.name_mapper = name_mapper
         
     def __call__(self, form, field):
+        print self.name_mapper(field.data)
+        print 'test'
         if self.model.objects(**{self.elem_name:self.name_mapper(field.data)}).count():
             raise ValidationError(self.message.format(elem=self.elem_name, 
                                                       value=field.data))
@@ -120,3 +122,12 @@ class ImageDetail(Form):
     created = DateTimeField('Created', readonly=True)
     author = StringField('Author', readonly=True)
     description = TextAreaField('Description', readonly=True, description='Describe your picture')
+    
+class NewCharacter(Form):
+    name = StringField('Name', [Required(), UniqueFile(docs.Character, 'slug')], description='Unique name of character')
+    is_player = BooleanField('Is the player character?', default=False)
+    gender = SelectField('Gender', choices=[('male', 'male'), ('female', 'female')])
+    quick_desription = StringField('Description', default='', description='Describe your character in few worlds')
+    desription = PageDownField('Enter characters description in markdown')
+    biography = PageDownField('Enter characters biography in markdown')
+    

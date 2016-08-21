@@ -4,10 +4,12 @@
 @date Created on Aug , 2016
 @author [Ryu-CZ](https://github.com/Ryu-CZ)
 '''
+import flask
+import markdown
+import datetime as dt
 from flask_mongoengine import Document
 from mongoengine import fields, NULLIFY
 from werkzeug import generate_password_hash
-import datetime as dt
 
 
 class User(Document):
@@ -95,4 +97,32 @@ class Image(Document):
     def full_name(self):
         return '{}.{}'.format(self.name, self.extension)
 User.register_delete_rule(Image, 'author', NULLIFY)
+
+
+class Character(Document):
+    name = fields.StringField(required=True, unique=True, 
+                              max_length=62, 
+                              placeholder='Unique name of character')
+    slug = fields.StringField(required=True, unique=True, 
+                              max_length=62, 
+                              placeholder='url-item-name')
+    image_id = fields.ReferenceField('Image')
+    owner_id = fields.ReferenceField('User')
+    create_date = fields.DateTimeField(required=True)
+    edit_date = fields.DateTimeField(required=True, default=dt.datetime.utcnow)
+    quick_desription = fields.StringField(required=False, default='') #short char description
+    desription = fields.StringField(required=False, default='') #markdown char description
+    biography = fields.StringField(required=False, default='') #markdown char history
+    tags = fields.ListField(fields.StringField())
+    is_player = fields.BooleanField(required=True, defauld=False)
+    gender = fields.StringField(required=False, defauld=None)
     
+    def html_biography(self):
+        flask.Markup(markdown.markdown(self.biography))
+        
+    def html_desription(self):
+        flask.Markup(markdown.markdown(self.desription))
+
+
+Image.register_delete_rule(Character, 'image_id', NULLIFY)
+User.register_delete_rule(Character, 'owner_id', NULLIFY)
