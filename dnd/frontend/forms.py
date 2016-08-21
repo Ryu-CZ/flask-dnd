@@ -6,10 +6,10 @@
 '''
 from dnd import docs
 from flask_wtf import Form, file
-from wtforms import PasswordField, HiddenField, StringField, TextAreaField, BooleanField, SelectField, RadioField
+from wtforms import PasswordField, HiddenField, StringField, TextAreaField, BooleanField, RadioField
 from wtforms.fields.html5 import EmailField, DateTimeField
 # Import Form validators
-from wtforms.validators import Required, Email, Optional, Length, EqualTo, ValidationError, Regexp, Length
+from wtforms.validators import Required, Email, Optional, EqualTo, ValidationError, Regexp, Length
 from flask_pagedown.fields import PageDownField
 import re
 from werkzeug import secure_filename
@@ -130,3 +130,4 @@ class NewCharacter(Form):
     quick_desription = StringField('Description', [Required(), Length(max=124)], default='', description='Describe your character in few worlds')
     desription = PageDownField('Enter characters description in markdown')
     biography = PageDownField('Enter characters biography in markdown')
+    image = file.FileField('Character image', [file.FileAllowed(['jpg', 'png'], 'Images only!')])

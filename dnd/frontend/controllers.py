@@ -419,16 +419,26 @@ def init(app):
 
     @app.route('/characters/new', methods=['GET', 'POST'], endpoint='character_new')
     @login_required
-    def chraacter_new():
-        form = forms.NewCharacter(flask.request.form)
-        if form.validate_on_submit():
-            #submiting new character
+    def character_new():
+        form = None
+        if flask.request.method == 'POST':
+            form = forms.NewCharacter()
+            #submitting new character
             slug = secure_filename(form.name.data.lower())
             #creating new char
             now = dt.datetime.utcnow()
+            doc_img = None
+            if form.image.data:
+                doc_img = docs.Image(name=slug,
+                                     extension=os.path.splitext(secure_filename(form.image.data.filename))[1][1:].strip().lower(),
+                                     author_id=current_user._get_current_object(),
+                                     created=now,
+                                     description='Character {} profile image'.format(slug))
+                doc_img.file.put(form.image.data)
+                doc_img.save()
             doc = docs.Character(name=form.name.data,
                                  slug=slug,
-                                 image_id=None,
+                                 image_id=doc_img,
                                  create_date=now,
                                  edit_date=now,
                                  owner_id = None,
@@ -441,13 +451,22 @@ def init(app):
             doc.save()
             flask.flash('Character "{}" is saved as new.'.format(doc.slug), 'success')
             #view new char after creation
-            return flask.redirect(url_for('character_new', page_name=doc.slug))
+            return flask.redirect(url_for('character', slug=doc.slug))
+        else:
+            form = forms.NewCharacter(flask.request.form)
         return flask.render_template('character_new.html', 
                                      form=form, 
                                      characters=True, 
                                      title='DnD|Characters')
 
-#     @app.route('/characters', endpoint='characters')
+    @app.route('/characters', endpoint='characters')
+    def characters():
+        pagination = docs.Character.objects.order_by('is_player','name').paginate(page=int(flask.request.args.get('page', 1)), 
+                                                                                  per_page=int(app.config.get('CHARACTERS_PER_PAGE')))
+        return flask.render_template('character_list.html', 
+                                     title='DnD|Characters',
+                                     characters=pagination.items,
+                                     pagination=pagination)
 
     @app.route('/characters/<slug>', endpoint='character')
     def character(slug):

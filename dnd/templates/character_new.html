@@ -4,7 +4,7 @@
 {% block content  %}
 {{ render_flashed_messages() }}
 <div class="container">
-    {{ render_form(form, class_='inline-form') }}
+    {{ render_form(form, class_='inline-form', enctype_='multipart/form-data') }}
 </div>
 {% endblock %}
 {% block bodyscripts %}

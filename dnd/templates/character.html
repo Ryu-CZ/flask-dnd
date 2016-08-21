@@ -6,13 +6,13 @@
   <h2>{{ character.name }}</h2>
   <p class="text-nowrap">{{ character.quick_desription }}</p>
   <div class="row">
-    <div class="col-sm-9">
+    <div class="col-sm-8">
       <h5><small>Description</small></h5>
       {{ character.html_desription() }}
     </div>
     {% if character.image_id %}
-    <div class="col-sm-3">
-      <img class="img-responsive" src="{{ url_for('image', img_name=character.image_id.name) }}" alt="{{ character.image_id.name }}" style="margin:10px;">
+    <div class="col-sm-4">
+      <img class="img-responsive" src="{{ url_for('image', img_name=character.image_id.name) }}" alt="{{ character.image_id.name }}" style="margin:4px;min-width:72px">
     </div>
     {% endif %}
     <div class="col-sm-12">
