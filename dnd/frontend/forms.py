@@ -131,3 +131,6 @@ class NewCharacter(Form):
     desription = PageDownField('Enter characters description in markdown')
     biography = PageDownField('Enter characters biography in markdown')
     image = file.FileField('Character image', [file.FileAllowed(['jpg', 'png'], 'Images only!')])
+    
+class EditCharacter(NewCharacter):
+    pk = HiddenField()

@@ -3,7 +3,8 @@
 {% block content  %}
 {{ render_flashed_messages() }}
 <div class="container-fluid">
-  <h2>{{ character.name }}</h2>
+  {% if current_user.is_authenticated() %}<a href="{{ url_for('character_edit', slug=character.slug) }}" title="Edit character"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> Edit</a>
+  {% endif %}<h2>{{ character.name }}</h2>
   <p class="text-nowrap">{{ character.quick_desription }}</p>
   <div class="row">
     <div class="col-sm-8">

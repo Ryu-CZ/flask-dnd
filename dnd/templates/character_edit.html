@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% from "macros.html" import render_flashed_messages %}
+{% from "macros_forms.html" import render_form %}
+{% block content  %}
+{{ render_flashed_messages() }}
+<div class="container">
+	<h5><small>Editing character</small></h5><h3> {{ character.name }}</h3>
+    {{ render_form(form, class_='inline-form', enctype_='multipart/form-data') }}
+</div>
+{% endblock %}
+{% block bodyscripts %}
+{{ pagedown.include_pagedown() }}
+{% endblock %}

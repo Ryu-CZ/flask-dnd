@@ -476,8 +476,74 @@ def init(app):
     def character(slug):
         c = docs.Character.objects.get_or_404(slug=secure_filename(slug).lower())
         return flask.render_template('character.html', 
-                                     title='DnD|Characters',  
+                                     title='DnD|{}'.format(c.slug),  
                                      characters=True, 
                                      character=c)
         
-#     @app.route('/characters/<slug>/edit', methods=['GET', 'POST'], endpoint='character_edit')
+    @app.route('/characters/<slug>/edit', methods=['GET', 'POST'], endpoint='character_edit')
+    @login_required
+    def character_edit(slug):
+        form = None
+        doc = None
+        if flask.request.method == 'POST':
+            print 'post'
+            form = forms.EditCharacter()
+            doc = docs.Character.objects.get_or_404(pk=form.pk.data)
+            #submitting new character
+            slug = secure_filename(form.name.data.lower())
+            #creating new char
+            now = dt.datetime.utcnow() 
+            if form.image.data:
+                #resolve image changes
+                if doc.image_id is None:
+                    #no current image is binded with character
+                    doc_img = docs.Image.objects(name=slug)
+                    if 0<len(doc_img):
+                        # in db exist record with duplicate name
+                        doc_img = doc_img[0]
+                        doc_img.name = slug
+                        doc_img.extension=os.path.splitext(secure_filename(form.image.data.filename))[1][1:].strip().lower()
+                        doc_img.description='Character {} profile image'.format(slug)
+                        doc_img.author_id = current_user._get_current_object()
+                        doc_img.file.replace(form.image.data)
+                    else:
+                        #create new image
+                        doc_img = docs.Image(name=slug,
+                                             extension=os.path.splitext(secure_filename(form.image.data.filename))[1][1:].strip().lower(),
+                                             author_id=current_user._get_current_object(),
+                                             created=now,
+                                             description='Character {} profile image'.format(slug))
+                        doc_img.file.put(form.image.data)
+                    doc_img.save()
+                    doc.image_id = doc_img
+                else:
+                    #update existing image
+                    doc.image_id.name = slug
+                    doc.image_id.extension = os.path.splitext(secure_filename(form.image.data.filename))[1][1:].strip().lower()
+                    doc.image_id.description = 'Character {} profile image'.format(slug)
+                    if doc.image_id.author_id is None:
+                        doc.image_id.author_id = current_user._get_current_object()
+                    doc.image_id.file.replace(form.image.data)
+                    doc.image_id.save()
+            #update character data
+            doc.name = form.name.data
+            doc.slug = slug
+            doc.edit_date = now
+            doc.is_player = form.is_player.data
+            doc.gender = form.gender.data
+            doc.quick_desription = form.quick_desription.data #short char description
+            doc.desription = form.desription.data #markdown char description
+            doc.biography = form.biography.data #markdown char history
+            doc.save()
+            flask.flash('Character "{}" changes saved.'.format(doc.slug), 'success')
+            #view new char after creation
+            return flask.redirect(url_for('character', slug=doc.slug))
+        else:
+            doc = docs.Character.objects.get_or_404(slug=slug)
+            form = forms.EditCharacter(flask.request.form, obj=doc)
+            form.gender.default = doc.gender
+        return flask.render_template('character_edit.html', 
+                                     form=form,
+                                     character=doc,
+                                     characters=True, 
+                                     title='DnD|{}'.format(doc.slug),)

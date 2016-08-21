@@ -17,7 +17,7 @@
 	      		{% endif %}
 	        </div>
 	        <div class="col-md-8">
-         		<div class="box"><h4><a href="{{ url_for('character', slug=c.slug) }}" title="{{ c.name }}">{{ c.name }}</a></h4> </div>
+         		<div class="box"><h4><a href="{{ url_for('character', slug=c.slug) }}" title="{{ c.name }}">{{ c.name }}</a>{% if current_user.is_authenticated() %} <a href="{{ url_for('character_edit', slug=c.slug) }}" title="Edit character"><small><i class="fa fa-pencil-square-o" aria-hidden="true"></i></small></a>{% endif %}</h4></div>
           		<div class="box"><p>{{ c.quick_desription }}</p></div>
 	        </div>
         </div>
