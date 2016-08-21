@@ -446,6 +446,15 @@ def init(app):
                                      form=form, 
                                      characters=True, 
                                      title='DnD|Characters')
+
 #     @app.route('/characters', endpoint='characters')
-#     @app.route('/characters/<slug>', endpoint='character')
+
+    @app.route('/characters/<slug>', endpoint='character')
+    def character(slug):
+        c = docs.Character.objects.get_or_404(slug=secure_filename(slug).lower())
+        return flask.render_template('character.html', 
+                                     title='DnD|Characters',  
+                                     characters=True, 
+                                     character=c)
+        
 #     @app.route('/characters/<slug>/edit', methods=['GET', 'POST'], endpoint='character_edit')

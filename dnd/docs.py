@@ -118,10 +118,10 @@ class Character(Document):
     gender = fields.StringField(required=False, defauld=None)
     
     def html_biography(self):
-        flask.Markup(markdown.markdown(self.biography))
+        return flask.Markup(markdown.markdown(self.biography))
         
     def html_desription(self):
-        flask.Markup(markdown.markdown(self.desription))
+        return flask.Markup(markdown.markdown(self.desription))
 
 
 Image.register_delete_rule(Character, 'image_id', NULLIFY)

@@ -2,10 +2,12 @@
 {% from "macros.html" import render_flashed_messages %}
 {% block content  %}
 {{ render_flashed_messages() }}
-<div class="container-fluid card" style="background-color:wite;">
-  <div class="row card-block">
+<div class="container-fluid">
+  <h2>{{ character.name }}</h2>
+  <p class="text-nowrap">{{ character.quick_desription }}</p>
+  <div class="row">
     <div class="col-sm-9">
-      <h4 class="card-title">Description</h4>
+      <h5><small>Description</small></h5>
       {{ character.html_desription() }}
     </div>
     {% if character.image_id %}
@@ -13,11 +15,11 @@
       <img class="img-responsive" src="{{ url_for('image', img_name=character.image_id.name) }}" alt="{{ character.image_id.name }}" style="margin:10px;">
     </div>
     {% endif %}
-  </div>
-  <div class="card-block">
-    <h4 class="card-title">Bio</h4>
-    <div class="card-text">
-      {{ character.html_biography() }}
+    <div class="col-sm-12">
+      <h5><small>Bio</small></h5>
+      <div>
+        {{ character.html_biography() }}
+      </div>
     </div>
   </div>
 </div>

@@ -6,10 +6,10 @@
 '''
 from dnd import docs
 from flask_wtf import Form, file
-from wtforms import PasswordField, HiddenField, StringField, TextAreaField, BooleanField, SelectField
+from wtforms import PasswordField, HiddenField, StringField, TextAreaField, BooleanField, SelectField, RadioField
 from wtforms.fields.html5 import EmailField, DateTimeField
 # Import Form validators
-from wtforms.validators import Required, Email, Optional, Length, EqualTo, ValidationError, Regexp
+from wtforms.validators import Required, Email, Optional, Length, EqualTo, ValidationError, Regexp, Length
 from flask_pagedown.fields import PageDownField
 import re
 from werkzeug import secure_filename
@@ -126,8 +126,7 @@ class ImageDetail(Form):
 class NewCharacter(Form):
     name = StringField('Name', [Required(), UniqueFile(docs.Character, 'slug')], description='Unique name of character')
     is_player = BooleanField('Is the player character?', default=False)
-    gender = SelectField('Gender', choices=[('male', 'male'), ('female', 'female')])
-    quick_desription = StringField('Description', default='', description='Describe your character in few worlds')
+    gender = RadioField('Gender', default='male', choices=[('male', 'male'), ('female', 'female')])
+    quick_desription = StringField('Description', [Required(), Length(max=124)], default='', description='Describe your character in few worlds')
     desription = PageDownField('Enter characters description in markdown')
     biography = PageDownField('Enter characters biography in markdown')
-    
