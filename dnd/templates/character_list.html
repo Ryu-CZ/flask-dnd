@@ -4,24 +4,29 @@
 {% block content  %}
 <div class="container" align="center">
   {{ render_flashed_messages() }}
+  {% if current_user.is_authenticated() %}
+  <div><a href="{{ url_for('character_new') }}" title="Create new character"><i class="fa fa-plus" aria-hidden="true"></i><i class="fa fa-child" aria-hidden="true"></i></a></div>
+  {% endif %}
   <div class="row" style="max-width:640px">
   {% for c in characters %}
-      <div class="col-md-6" style="height:94px;">
-      	<div class="row vertical-align panel panel-default" style="height:90px;margin:2px" >
+      <div class="col-md-6" style="min-height:94px;min-width:280px">
+      	<div class="row vertical-align panel panel-default" style="min-height:90px;margin:2px" >
 	      	<div class="col-md-4" >
-	      		{% if c.image_id %}<img src="{{ url_for('images_thumb', img_name=c.image_id.full_name()) }}" alt="{{ c.image_id.full_name() }}" height="88px"> {% endif %}
+	      		{% if c.image_id %}<a href="{{ url_for('character', slug=c.slug) }}" title="{{ c.name }}">
+	      		<img src="{{ url_for('images_thumb', img_name=c.image_id.full_name()) }}" alt="{{ c.image_id.full_name() }}" height="88px"></a>
+	      		{% endif %}
 	        </div>
 	        <div class="col-md-8">
-         		<div class="box"><h4><a href="{{ url_for('character', slug=c.slug) }}" title="Detail">{{ c.name }}</a></h4> </div>
+         		<div class="box"><h4><a href="{{ url_for('character', slug=c.slug) }}" title="{{ c.name }}">{{ c.name }}</a></h4> </div>
           		<div class="box"><p>{{ c.quick_desription }}</p></div>
 	        </div>
         </div>
       </div>
   {% endfor %}
   </div>
-  {% if characters %}
+  {% if pagination %}
   <div class="clearfix">
-  {{ render_pagination(pagination=pagination, endpoint='character') }}
+    {{ render_pagination(pagination=pagination, endpoint='character') }}
   </div>
   {% endif %}
 </div>

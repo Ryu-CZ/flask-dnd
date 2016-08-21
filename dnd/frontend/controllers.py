@@ -429,11 +429,17 @@ def init(app):
             now = dt.datetime.utcnow()
             doc_img = None
             if form.image.data:
-                doc_img = docs.Image(name=slug,
-                                     extension=os.path.splitext(secure_filename(form.image.data.filename))[1][1:].strip().lower(),
-                                     author_id=current_user._get_current_object(),
-                                     created=now,
-                                     description='Character {} profile image'.format(slug))
+                doc_img = docs.Image.objects(name=slug)
+                if 0<len(doc_img):
+                    doc_img = doc_img[0]
+                    doc_img.extension=os.path.splitext(secure_filename(form.image.data.filename))[1][1:].strip().lower()
+                    doc_img.description='Character {} profile image'.format(slug)
+                else:
+                    doc_img = docs.Image(name=slug,
+                                         extension=os.path.splitext(secure_filename(form.image.data.filename))[1][1:].strip().lower(),
+                                         author_id=current_user._get_current_object(),
+                                         created=now,
+                                         description='Character {} profile image'.format(slug))
                 doc_img.file.put(form.image.data)
                 doc_img.save()
             doc = docs.Character(name=form.name.data,
@@ -461,12 +467,10 @@ def init(app):
 
     @app.route('/characters', endpoint='characters')
     def characters():
-        pagination = docs.Character.objects.order_by('is_player','name').paginate(page=int(flask.request.args.get('page', 1)), 
-                                                                                  per_page=int(app.config.get('CHARACTERS_PER_PAGE')))
+        characters = docs.Character.objects.order_by('is_player','name')
         return flask.render_template('character_list.html', 
                                      title='DnD|Characters',
-                                     characters=pagination.items,
-                                     pagination=pagination)
+                                     characters=characters)
 
     @app.route('/characters/<slug>', endpoint='character')
     def character(slug):
