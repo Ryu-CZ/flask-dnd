@@ -328,7 +328,7 @@ def init(app):
         return flask.render_template('clear_image.html', img_url=url_for('image', img_name=title), title=title, images=True)
     
     
-    @app.route('/images/<img_name>/thumb', endpoint='images_thumb')
+    @app.route('/images/thumbs/<img_name>', endpoint='images_thumb')
     def images_thumb(img_name):
         img = None
         img_name = secure_filename(img_name.lower())
